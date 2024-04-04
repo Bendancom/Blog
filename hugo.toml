@@ -1,0 +1,14 @@
+baseURL = 'https://Bendancom.github.io/'
+languageCode = 'zh-cn'
+title = 'Bendancom 的博客'
+author = 'Bendancom'
+theme = 'jane'
+defaultContentLanguage = "zh-cn"
+
+[params]
+  # color style
+  color = 'linen'                           # linen, wheat, gray, light
+
+  # header social icons
+  github = 'Bendancom'                 # github.com/YOUR_GITHUB_ID
+  rss = true                                # show rss icon

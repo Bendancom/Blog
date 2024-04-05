@@ -1,12 +1,17 @@
-+++
-title = 'Markdown技术手册'
-date = 2023-06-18T23:00:00+08:00
-draft = false
-+++
+---
+title: 'Markdown技术手册'
+date: 2023-06-18T23:00:00+08:00
+lastmod: 2024-04-05T20:51:00+08:00
+draft: true
+keywords: "Markdown"
+tags: ["Markdown"]
+---
 
 # MarkDown技术手册(个人编写版)
 
-本篇技术手册由个人编撰汇总而成。
+本篇技术手册由个人编撰汇总而成。旨在撰写`Markdown`时记忆查询
+
+<!--more-->
 
 ## 标题
 
@@ -467,10 +472,20 @@ end
     ```
 ```
 
-### 待办事项Todo
+### 待办事项(Todo)
 
 语法：`- [ ] 文本` 或 `- [X] 文本`，X不限大小写  
 X代表已完成
+
+#### 案例
+
+- [ ] 未完成
+- [x] 已完成
+
+```Markdown
+- [ ] 未完成
+- [x] 已完成
+```
 
 参考网址：  
 [1] [菜鸟教程](https://www.runoob.com/markdown/md-tutorial.html)  

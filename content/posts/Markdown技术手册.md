@@ -1,13 +1,11 @@
 ---
 title: 'Markdown技术手册'
 date: 2023-06-18T23:00:00+08:00
-lastmod: 2024-04-05T20:51:00+08:00
+lastmod: 2024-04-06T13:53:00+08:00
 draft: false
 keywords: "Markdown"
 tags: ["Markdown"]
 ---
-
-# MarkDown技术手册(个人编写版)
 
 本篇技术手册由个人编撰汇总而成。旨在撰写`Markdown`时便于记忆查询
 

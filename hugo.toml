@@ -501,11 +501,11 @@ enableEmoji = true
     rss = 10
     # Home page profile
     [params.home.profile]
-      enable = false
+      enable = true
       # Gravatar Email for preferred avatar in home page
       gravatarEmail = ""
       # URL of avatar shown in home page
-      avatarURL = ""
+      avatarURL = "avator.png"
       # FixIt 0.2.17 | NEW identifier of avatar menu link
       avatarMenu = ""
       # title shown in home page (HTML format is supported)
@@ -611,7 +611,7 @@ enableEmoji = true
     Douyin = ""
     TikTok = ""
     Phone = ""
-    Email = ""
+    Email = "bendancom@qq.com"
     RSS = true
 
   # Page config

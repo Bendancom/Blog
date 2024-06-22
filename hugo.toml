@@ -913,12 +913,12 @@ enableEmoji = true
         katex = false
       # FixIt 0.2.14 | NEW Giscus comments config
       [params.page.comment.giscus]
-        enable = false
-        repo = ""
-        repoId = ""
-        category = ""
-        categoryId = ""
-        mapping = ""
+        enable = true
+        repo = "Bendancom/Bendancom.github.io"
+        repoId = "R_kgDOJw8xDg"
+        category = "Announcements"
+        categoryId = "DIC_kwDOJw8xDs4CgRcb"
+        mapping = "pathname"
         strict = "0" # FixIt NEW | 0.2.18
         term = ""
         reactionsEnabled = "1"

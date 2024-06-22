@@ -927,7 +927,7 @@ enableEmoji = true
         inputPosition = "bottom" # ["top", "bottom"]
         lightTheme = "light"
         darkTheme = "dark"
-        lazyLoad = false
+        lazyLoad = true
     # Third-party library config
     [params.page.library]
       [params.page.library.css]

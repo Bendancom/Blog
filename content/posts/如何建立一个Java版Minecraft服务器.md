@@ -4,6 +4,7 @@ date: 2023-06-18T23:00:00+08:00
 lastmod: 2024-04-06T13:53:00+08:00
 draft: false
 keywords: "Minecraft 服务器"
+categories: ["Minecraft"]
 tags: ["Minecraft","服务器"]
 ---
 

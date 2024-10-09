@@ -159,6 +159,16 @@ enableEmoji = true
       table = true
       taskList = true
       typographer = true
+      [markup.goldmark.extensions.passthrough]
+        enable = true
+        delimiters.block = [
+          ["\\[", "\\]"],
+          ["$$", "$$"]
+        ]
+        delimiters.inline = [
+          ["\\(", "\\)"],
+          ["$", "$"]
+        ]
     [markup.goldmark.renderer]
       # whether to use HTML tags directly in the document
       unsafe = true

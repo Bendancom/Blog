@@ -23,7 +23,7 @@ languageName = "简体中文"
 # whether to include Chinese/Japanese/Korean
 hasCJKLanguage = true
 # default amount of posts in each pages
-paginate = 12
+pagerSize = 12
 # copyright description used only for seo schema
 copyright = ""
 # whether to use robots.txt
@@ -1007,7 +1007,7 @@ enableEmoji = true
     fontFamily = "inherit"
 
   # FixIt 0.2.12 | NEW Busuanzi count
-  [params.ibruce]
+  [params.busuanzi]
     enable = false
     # Enable in post meta
     enablePost = false

@@ -1,0 +1,2 @@
+# Blog
+Bendancom's blog

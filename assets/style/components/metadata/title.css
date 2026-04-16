@@ -10,13 +10,6 @@
 	font-weight: bold;
 }
 
-.metadata-title-link-symbol {
-	opacity: 1;
-	font-size: 2rem;
-	display: inline-block;
-	vertical-align: middle;
-}
-
 .metadata-title::before {
 	position: absolute;
 	content: '';
@@ -30,14 +23,4 @@
 
 a.metadata-title:hover {
 	color: var(--primary);
-}
-
-a.metadata-title:hover .metadata-title-link-symbol {
-	opacity: 1;
-}
-
-@media(min-width: 768px){
-	.metadata-title-link-symbol {
-		opacity: 0;
-	}
 }

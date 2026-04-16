@@ -34,10 +34,6 @@ symbolList = "符号表"
 [abbr.zh]
 PDE = "偏微分方程"
 
-[symbol.zh]
-Force = "力"
-Mass = "质量"
-
 [config.en]
 siteTitle = "Bendancom's blog"
 siteAuthor = "Bendancom"
@@ -74,6 +70,3 @@ symbolList = "List of Symbol"
 [abbr.en]
 PDE = "Partial Differential Equation"
 
-[symbol.en]
-Force = "Force"
-Mass = "Mass"

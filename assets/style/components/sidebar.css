@@ -172,7 +172,7 @@
 
 .category-item:hover .category-count {
     background-color: var(--primary);
-    color: var(--deep-text);
+    color: var(--btn-regular-bg);
 }
 
 .category-name {
@@ -216,7 +216,7 @@
 
 .tag:hover {
     background-color: var(--primary);
-	color: var(--deep-text);
+	color: var(--btn-regular-bg);
 }
 
 @media (min-width: 1024px) {

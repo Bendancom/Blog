@@ -80,6 +80,50 @@ for file in COMPONENTS_DIR.iterdir():
     else:
         components[file.stem]["template"] = Template(file.read_text(encoding="UTF-8"))
 
+def compileTypstStr(content: str) -> str:
+    command = [
+        "typst",
+        "compile",
+        "--features",
+        "html",
+        "--format",
+        "html",
+        "--root",
+        str(BASE_DIR),
+        "-",
+        "-"
+    ]
+
+    typst = f"""
+        #import "/typ/base.typ": base
+        #import "/typ/html.typ": html-base
+        #show: base
+        #show: html-base
+        {content}
+    """
+
+    result = subprocess.run(
+        command,
+        input=typst,
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        print(f"Failed Compile {file.relative_to(BASE_DIR)}")
+        print(result.stderr)
+        return
+
+    html = result.stdout
+
+    bodyIndex = html.find("<body>") + 6
+    bodyRIndex = html.rfind("</body>") - 1
+    htmlContent = html[bodyIndex:bodyRIndex]
+
+    replace = re.sub("(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)","\\1",htmlContent).replace("<p>","").replace("</p>","")
+
+    return replace
+
 def getMetadata(file: Path) -> dict:
     print(f"Parsing {file.relative_to(BASE_DIR)}")
 
@@ -120,7 +164,8 @@ def getMetadata(file: Path) -> dict:
                     return " "
             if text:
                 if len(data) > 0:
-                    return f"#{func}(\"{text}\" {"," + ",".join(data)})"
+                    # return f"#{func}(\"{text}\" {"," + ",".join(data)})"
+                    return f"#{func}(\"{text}\")"
                 else:
                     return f"#{func}(\"{text}\")"
             if body:
@@ -147,9 +192,26 @@ def getMetadata(file: Path) -> dict:
     if len(metadata) == 0:
         return
 
-    pattern = r'"([^"]*)"'
-    metadata["title"] = "".join(metadata["title"])
-    metadata["titleString"] = "".join(re.findall(pattern,metadata["title"]))
+    def getString(rawStrings) -> str:
+        pattern = re.compile("\"([^\"]*)\"")
+        result = []
+        if isinstance(rawStrings,list):
+            for s in rawStrings:
+                m = pattern.findall(s)
+                if len(m) == 1:
+                    result.append(m[0])
+                else:
+                    result.append(s)
+        else:
+            m = pattern.findall(rawStrings)
+            if len(m) == 1:
+                result.append(m[0])
+            else:
+                result.append(rawStrings)
+        return "".join(result)
+
+    metadata["titleString"] = getString(metadata["title"])
+    metadata["title"] = compileTypstStr("".join(metadata["title"]))
     metadata["premalink"] = Path(f"{metadata["lang"][0:2]}/posts")
     if metadata["order"] is not None:
         metadata["premalink"] = metadata["premalink"] / "series"
@@ -165,15 +227,15 @@ def getMetadata(file: Path) -> dict:
             metadata["tags"] = [metadata["tags"]]
 
     if metadata["subtitle"] is not None:
-        metadata["subtitle"] = "".join(metadata["subtitle"])
-        metadata["subtitleString"] = "".join(re.findall(pattern,metadata["subtitle"]))
+        metadata["subtitleString"] = getString(metadata["subtitle"])
+        metadata["subtitle"] = compileTypstStr("".join(metadata["subtitle"]))
         metadata["premalink"] = metadata["premalink"] / metadata["subtitleString"]
     else:
         metadata["subtitleString"] = None
 
     if metadata["description"] is not None:
-        metadata["description"] = "".join(metadata["description"])
-        metadata["descriptionString"] = "".join(re.findall(pattern,metadata["description"]))
+        metadata["descriptionString"] = getString(metadata["description"])
+        metadata["description"] = compileTypstStr("".join(metadata["description"]))
     else:
         metadata["descriptionString"] = None
 
@@ -215,8 +277,6 @@ def sortMetadata(metadatas: list) -> list:
     return result
 
 def compileTypst(file: Path) -> str:
-    print(f"Compiling {file.relative_to(BASE_DIR)}")
-    
     command = [
         "typst",
         "compile",
@@ -232,7 +292,7 @@ def compileTypst(file: Path) -> str:
     
     result = subprocess.run(command,capture_output=True,text=True)
     if result.returncode != 0:
-        print(f"Failed Parsing {file.relative_to(BASE_DIR)}")
+        print(f"Failed Compile {file.relative_to(BASE_DIR)}")
         print(result.stderr)
         return
 
@@ -377,9 +437,9 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
     date = data.pop("date").strftime("%Y-%m-%d")
     lastModDate = data.pop("lastModDate",None)
 
-    title = data["titleString"]
-    if data["subtitleString"]:
-        title = f"{title}｜{data["subtitleString"]}"
+    title = data["title"]
+    if data["subtitle"]:
+        title = f"{title}｜{data["subtitle"]}"
     
     category = data.pop("category",None)
     if category:
@@ -741,7 +801,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
             for one in data["metadatas"]:
                 seriesLinks.append(components["series"]["subcomponents"]["series-link"]
                     .substitute({
-                        "subtitle": one["subtitleString"] if one["subtitleString"] else "",
+                        "subtitle": one["subtitle"] if one["subtitle"] else "",
                         "date": one["date"].strftime("%Y-%m-%d"),
                         "divider": "｜",
                         "category": one["category"],
@@ -758,7 +818,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                     }))
                 latestLinks.append(components["series"]["subcomponents"]["latest-link"]
                     .substitute({
-                        "subtitle": one["subtitleString"] if one["subtitleString"] else "",
+                        "subtitle": one["subtitle"] if one["subtitle"] else "",
                         "divider": "｜",
                         "date": one["date"].strftime("%Y-%m-%d"),
                         "category": one["category"],
@@ -777,9 +837,9 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
 
         else:
             archiveItems.append(components["single"]["template"].substitute({
-                "title": data["latest"]["titleString"],
-                "subtitle": data["latest"]["subtitleString"] if data["latest"]["subtitleString"] else "",
-                "divider": "｜" if data["latest"]["subtitleString"] else "",
+                "title": data["latest"]["title"],
+                "subtitle": data["latest"]["subtitle"] if data["latest"]["subtitle"] else "",
+                "divider": "｜" if data["latest"]["subtitle"] else "",
                 "date": data["latest"]["date"].strftime("%Y-%m-%d"),
                 "category": data["latest"]["category"],
                 "tags": " ".join(data["latest"]["tags"]),
@@ -892,6 +952,7 @@ def build():
         languagelist.add(lang)
 
         if file.relative_to(CONTENT_DIR).parts[0] == "about":
+            print(f"Compiling {file.relative_to(BASE_DIR)}")
             about[lang]["content"] = compileTypst(file)
             about[lang]["metadata"] = metadata
             continue
@@ -904,6 +965,7 @@ def build():
             else:
                 allcategories[lang][metadata["category"]] = 1
 
+        print(f"Compiling {file.relative_to(BASE_DIR)}")
         metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
 
         metadatas[lang].append(metadata)

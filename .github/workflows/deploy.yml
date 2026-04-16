@@ -1,10 +1,10 @@
-name: build and deploy on the git page
+name: Build and Deploy to GitHub Pages
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch: true
- 
+
 permissions:
   contents: read
   pages: write
@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -22,31 +22,54 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # 1. 检出代码
-      - name: 检出仓库代码
+      # 1. Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. 设置 Python 环境
-      - name: 设置 Python
+      # 2. Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.12'
+          cache: 'pip'
 
-      - name: 安装 Typst
+      # 3. Setup Typst
+      - name: Setup Typst
         uses: typst-community/setup-typst@v4
         with:
           typst-version: 'latest'
-      
-          # 5. 执行 Python 构建脚本
-      # 请确保此脚本能生成最终的静态网站文件，例如放在 './public' 目录下
-      - name: 运行 Python 构建脚本
+          cache: true
+
+      # 4. Run build script
+      - name: Run build script
         run: |
           python build.py
 
-      # 6. 部署到 gh-pages 分支
-      - name: 部署到 GitHub Pages
+      # 5. Validate build output
+      - name: Validate build output
+        run: |
+          if [ ! -f "./public/index.html" ]; then
+            echo "Error: index.html not found in public directory"
+            exit 1
+          fi
+          echo "Build validation passed"
+
+      # 6. Upload build artifacts (optional, for debugging)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-folder
+          path: ./public
+          retention-days: 7
+
+      # 7. Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public  # 你的静态网站生成目录，如果不同请修改
-          publish_branch: gh-pages  # 部署到的分支
+          publish_dir: ./public
+          publish_branch: gh-pages
+          force_orphan: true

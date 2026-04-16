@@ -10,7 +10,6 @@ from string import Template
 from pathlib import Path
 from tomllib import load
 from collections import defaultdict
-from bs4 import BeautifulSoup
 
 # Test
 from pprint import pprint
@@ -555,10 +554,6 @@ def generateFeed(lang: str,metadatas: list) -> str:
     output_file = OUTPUT_DIR / lang / "feed.atom"
     output_file.parent.mkdir(exist_ok=True, parents=True)
     output_file.write_text("\n".join(feed), encoding="UTF-8")
-
-    import feedparser
-
-    test = feedparser.parse(output_file)
 
 def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)

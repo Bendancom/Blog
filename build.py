@@ -492,12 +492,16 @@ def generateFeed(lang: str,metadatas: list) -> str:
 
     test = feedparser.parse(output_file)
 
-def generateTemplate(template: Template,component: dict,metadata: dict,container: str,outputFile: Path):
+def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)
     outputFile.write_text(template.substitute({
         "container": container,
         **component,
-        "lang": metadata["lang"][0:2],
+        "lang": lang,
+        "siteAuthor": language["config"][lang]["siteAuthor"] if lang != "" else "",
+        "year": config["copyright"]["year"],
+        "sign": config["copyright"]["sign"],
+        "license": config["copyright"]["license"]
     }))
 
 def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,languageList: list):
@@ -572,7 +576,7 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
     generateTemplate(
         template=templates["within-sidebar"],
         container=home,
-        metadata=metadata,
+        lang=lang,
         component=component,
         outputFile= OUTPUT_DIR / lang / "index.html"
     )
@@ -657,7 +661,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
         generateTemplate(
             template=templates["within-sidebar"],
             container=post,
-            metadata=metadata,
+            lang=lang[0:2],
             component=component,
             outputFile=outputFile
         )
@@ -817,7 +821,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
         template=templates["within-sidebar"],
         component=component,
         container=archive,
-        metadata=metadata,
+        lang=lang,
         outputFile= OUTPUT_DIR / lang / "archive" / "index.html"
     )
 
@@ -867,7 +871,7 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
         template=templates["within-sidebar"],
         component=component,
         container=about,
-        metadata=metadata,
+        lang=metadata["lang"][0:2],
         outputFile= OUTPUT_DIR / metadata["lang"][0:2] / "about" / "index.html"
     )
 
@@ -920,7 +924,7 @@ def build():
             "defaultLanguage": config["info"]["defaultLanguage"],
             "icon": config["info"]["icon"]
         },
-        metadata={"lang": ""},
+        lang="",
         container="",
         outputFile= OUTPUT_DIR / "index.html"
     )

@@ -8,4 +8,6 @@ bilibili = "https://space.bilibili.com/43229292"
 github = "https://github.com/Bendancom"
 
 [copyright]
+sign = "©"
 year = 2026
+license = "CC BY-NC-SA 4.0"

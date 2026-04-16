@@ -1,0 +1,23 @@
+details.archive-item > a {
+	display: none;
+	text-decoration: none;
+	justify-content: space-between;
+	padding: var(--space-sm);
+	border-radius: var(--radius);
+	gap: 0.25rem;
+}
+
+details.archive-item .latest {
+	background-color: var(--selection-bg);
+}
+details.archive-item .latest:hover {
+	background-color: var(--btn-plain-bg-hover);
+}
+
+details.archive-item .order-subtitle-wrapper {
+	display: flex;
+}
+
+details.archive-item > a:hover {
+	background-color: var(--btn-plain-bg-hover);
+}

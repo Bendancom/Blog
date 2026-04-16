@@ -1,0 +1,21 @@
+details.archive-item summary {
+	list-style-position: outside;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+	padding: var(--space-sm);
+	border-radius: var(--radius);
+	/* width: 100%; */
+}
+
+details.archive-item summary:hover {
+	background-color: var(--btn-plain-bg-hover);
+}
+
+.archive-latest-link-wrapper {
+	padding: var(--space-sm);
+	border-radius: var(--radius);
+	box-sizing: border-box;
+	background-color: var(--btn-plain-bg-hover);
+}

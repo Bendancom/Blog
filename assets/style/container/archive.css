@@ -1,0 +1,13 @@
+#archive {
+	background-color: var(--card-bg);
+	border-radius: var(--radius-large);
+	padding-left: 2.25rem;
+	padding-right: 2.25rem;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	transition: height var(--transition-slow) ease-out;
+	position: relative;
+}

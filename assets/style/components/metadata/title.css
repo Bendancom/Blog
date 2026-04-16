@@ -1,0 +1,43 @@
+.metadata-title {
+	position: relative;
+	display: block;
+	margin-top: 0;
+	margin-bottom: var(--space-sm);
+	text-decoration: none;
+	width: 100%;
+	font-size: 1.875rem;
+	line-height: 2.25rem;
+	font-weight: bold;
+}
+
+.metadata-title-link-symbol {
+	opacity: 1;
+	font-size: 2rem;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.metadata-title::before {
+	position: absolute;
+	content: '';
+	background-color: var(--primary);
+	border-radius: 0.375rem;
+	top: 0.5rem;
+	left: -1rem;
+	width: 0.25rem;
+	height: 1.25rem;
+}
+
+a.metadata-title:hover {
+	color: var(--primary);
+}
+
+a.metadata-title:hover .metadata-title-link-symbol {
+	opacity: 1;
+}
+
+@media(min-width: 768px){
+	.metadata-title-link-symbol {
+		opacity: 0;
+	}
+}

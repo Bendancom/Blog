@@ -1,0 +1,35 @@
+#pagination {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	width: 100%;
+	gap: var(--space-md);
+	padding: var(--space-sm);
+	padding-top: var(--space-md);
+	box-sizing: border-box;
+	font-size: 1.5rem;
+}
+
+#pagination a {
+	display: flex;
+	justify-items: stretch;
+	align-items: center;
+	text-decoration: none;
+	padding: var(--space-sm);
+	border-radius: var(--radius);
+	background-color: var(--card-bg);
+	height: 3.75rem;
+	gap: var(--space-md);
+	box-sizing: border-box;
+}
+
+#pagination a:hover {
+	color: var(--primary);
+}
+
+#pagination svg {
+	font-size: 2rem;
+}
+
+#pagination div {
+	flex-grow: 1;
+}

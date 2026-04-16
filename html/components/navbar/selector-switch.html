@@ -1,0 +1,38 @@
+<button id="selector-switch" aria-hidden="true" aria-label="Toggle Selector" onclick="selectorNext()">
+	<div class="single">
+		${singleShort}
+	</div>
+	<div class="series">
+		${seriesShort}
+	</div>
+	<div class="all current">
+		${allShort}
+	</div>
+</button>
+
+<div id="selector-switch-menu-wrapper">
+	<div id="selector-switch-menu">
+		<button class="single" onclick="selectorSwitch('single')">
+			${single}
+		</button>
+		<button class="series" onclick="selectorSwitch('series')">
+			${series}
+		</button>
+		<button class="all current" onclick="selectorSwitch('all')" class="current">
+			${all}
+		</button>
+	</div>
+</div>
+
+<script>
+	(function (){
+		const type = localStorage.getItem("Selector");
+		if (type != null) {
+			document.getElementById("selector-switch").getElementsByClassName("current")[0].classList.remove("current")
+			document.getElementById("selector-switch-menu").getElementsByClassName("current")[0].classList.remove("current")
+    	
+			document.getElementById("selector-switch").getElementsByClassName(type)[0].classList.add("current")
+			document.getElementById("selector-switch-menu").getElementsByClassName(type)[0].classList.add("current")
+		}
+	})();
+</script>

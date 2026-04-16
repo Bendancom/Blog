@@ -1,0 +1,12 @@
+<div id="archive">
+	${archiveItems}
+</div>
+
+<script>
+	applyParams();
+
+	const type = localStorage.getItem("Selector");
+	if (type != null) {
+		applySelector(type);
+	}
+</script>

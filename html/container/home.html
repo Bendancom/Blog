@@ -1,0 +1,12 @@
+<div id="home">
+	${postCards}
+</div>
+
+<script>
+	(function(){
+		const type = localStorage.getItem("Selector");
+		if (type != null) {
+			selectorSwitch(type);
+		}
+	})();
+</script>

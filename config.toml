@@ -1,0 +1,12 @@
+[info]
+email = "bendancom@qq.com"  # Author email
+url = "https://bendancom.github.io"  # Site URL
+icon = "/assets/image/favicon.ico"
+avatar = "/assets/image/avatar.png"
+defaultLanguage = "zh"
+bilibili = "https://space.bilibili.com/43229292"
+github = "https://github.com/Bendancom"
+rss = ""
+
+[copyright]
+year = 2026

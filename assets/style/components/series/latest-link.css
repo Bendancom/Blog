@@ -1,0 +1,16 @@
+.archive-latest-link {
+	display: none;
+	text-decoration: none;
+}
+
+.archive-latest-link-wrapper {
+	padding: 0.25rem;
+	box-sizing: border-box;
+	background-color: var(--selection-bg);
+	border-radius: 0.25rem;
+}
+
+.archive-latest-link-wrapper:hover {
+	background-color: var(--btn-plain-bg-hover);
+	color: var(--deep-text);
+}

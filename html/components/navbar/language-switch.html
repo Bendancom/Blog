@@ -1,0 +1,21 @@
+<button id="language-switch" onclick="languageNext()">
+	${languageShortName}
+</button>
+
+<div id="language-switch-menu-wrapper">
+	<div id="language-switch-menu">
+		${languageName}
+	</div>
+</div>
+
+<script>
+	const language = localStorage.getItem("Language");
+	if (language != null) {
+		document.getElementById("language-switch").getElementsByClassName("current")[0].classList.remove("current");
+	
+		document.getElementById("language-switch").getElementsByClassName(language)[0].classList.add("current")
+	
+		document.getElementById("language-switch-menu").getElementsByClassName("current")[0].classList.remove("current");
+		document.getElementById("language-switch-menu").getElementsByClassName(language)[0].classList.add("current");
+	}
+</script>

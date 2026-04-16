@@ -1,0 +1,78 @@
+html {
+	font-size: 14px;
+}
+
+@media(min-width: 768px) {
+	html {
+		font-size: 16px;
+	}
+}
+
+body {
+	background-color: var(--page-bg);
+	color: var(--text-90);
+	min-height: 100vh;
+	margin: 0;
+	/* transition: color var(--transition-slow),background-color var(--transition-slow); */
+}
+
+a {
+	color: var(--text-90);
+}
+
+button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: transparent;
+	border-radius: var(--radius);
+	color: var(--text-90);
+	width: 2.75rem;
+	height: 2.75rem;
+	border-width: 0px;
+	box-sizing: border-box;
+	white-space: nowrap;
+	user-select: none;
+}
+
+button:hover {
+	color: var(--primary);
+    background-color: var(--btn-plain-bg-hover);
+}
+
+svg {
+	width: 1em;
+	height: 1em;
+	font-size: 1.25rem;
+	padding: auto;
+	line-height: 1.75rem;
+}
+
+div#container {
+	max-width: var(--page-width);
+    margin: 0 auto;
+	width: 100%;
+	order: 0;
+}
+
+div#main-grid {
+	box-sizing: border-box;
+    position: relative;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    display: flex;
+	flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    top: calc(var(--bannerOffset) - 3.5rem);
+}
+
+@media (min-width: 1024px) {
+    div#main-grid {
+		display: grid;
+        grid-template-columns: 17.5rem 1fr;
+    }
+	div#container{
+		order: 1;
+	}
+}

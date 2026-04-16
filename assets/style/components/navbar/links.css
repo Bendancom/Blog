@@ -1,0 +1,28 @@
+#navbar-links {
+    display: none;
+    gap: 0;
+}
+
+#navbar-links a {
+    display: flex;
+    align-items: center;
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: var(--radius);
+}
+
+#navbar-links a:hover {
+    background: var(--btn-plain-bg-hover);
+}
+
+#navbar-links a:active {
+    transform: scale(0.95);
+}
+
+@media(min-width: 768px) {
+	#navbar-links {
+		display: flex;
+	}
+}

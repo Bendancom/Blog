@@ -1,0 +1,25 @@
+#post {
+	background-color: var(--card-bg);
+	border-radius: var(--radius-large);
+	padding-left: 2.25rem;
+	padding-right: 2.25rem;
+	padding-top: 1.5rem;
+	padding-bottom: 1rem;
+	box-sizing: border-box;
+}
+
+#post-divider {
+	border-width: 0;
+	border-bottom-width: 0.1rem;
+	border-style: solid;
+	border-color: var(--primary);
+	margin-top: 1.25rem;
+	margin-bottom: 1.25rem;
+}
+
+#comment {
+	margin-top: var(--space-md);
+	padding: var(--space-md);
+	background-color: var(--card-bg);
+	border-radius: var(--radius-large);
+}

@@ -1,0 +1,6 @@
+@import "/assets/style/theme.css";
+
+main {
+	--color-btn-text: var(--text-90);
+	--color-canvas-overlay: var(--card-bg);
+}

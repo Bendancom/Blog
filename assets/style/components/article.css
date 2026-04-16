@@ -1,0 +1,93 @@
+article a {
+	text-decoration: none;
+	color: var(--primary);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+img {
+	width: 100%;
+	border-radius: var(--radius);
+}
+figure {
+	margin: 0;
+	text-align: center;
+}
+
+p {
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+}
+
+table {
+	margin: auto;
+}
+
+pre.code-block {
+	background-color: var(--codeblock-bg);
+	margin-top: 0;
+	color: var(--text-50);
+	border-bottom-left-radius: var(--space-sm);
+	border-bottom-right-radius: var(--space-sm);
+	padding-bottom: var(--space-sm);
+	padding-left: var(--space-sm);
+	padding-right: var(--space-sm);
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+details.code-wrapper > summary {
+	background-color: var(--codeblock-topbar-bg);
+	padding: var(--space-sm);
+	border-radius: var(--space-sm);
+	color: var(--text-50);
+}
+
+details.code-wrapper:open summary {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+div[role="math"] {
+	display: flex;
+	justify-content: center;
+	padding-top: var(--space-sm);
+	padding-bottom: var(--space-sm);
+}
+
+div[role="math"] svg  {
+	width: 100%;
+}
+
+div[role="img"] {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: var(--space-sm);
+	padding-bottom: var(--space-sm);
+}
+div[role=grid] {
+	display: grid;
+	gap: var(--space-sm);
+}
+div[role="cell"] {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
+table {
+	width: 100%;
+	line-height: 1.5rem;
+	border-top: 2px solid var(--text-90);
+	border-bottom: 2px solid var(--text-90);
+	border-collapse: collapse;
+	text-align: center;
+}
+
+table th {
+	border-bottom: 1px solid var(--text-90);
+}

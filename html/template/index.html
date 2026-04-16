@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+	<script>
+		const language = localStorage.getItem("Language");
+		if (language != null) {
+			if (language == "system") {
+				window.location.replace(window.location.href + navigator.language.substring(0,2));
+			}
+			else {
+				window.location.replace(window.location.href + language);
+			}
+		}
+		else {
+			localStorage.setItem("Language","system");
+			window.location.replace(window.location.href + navigator.language.substring(0,2));
+		}
+	</script>
+</html>

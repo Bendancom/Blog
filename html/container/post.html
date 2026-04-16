@@ -1,0 +1,31 @@
+<div id="post">
+	<header>
+		${metadata}	
+		<div id="post-divider"></div>
+	</header>
+	<main>
+		<article data-title="${title}" data-subtitle="${subtitle}" data-fulltitle="${fulltitle}" data-authors="${authors}" data-date="${date}" data-category="${category}" data-tags="${tags}" data-description="${description}">
+        	${content}
+		</article>
+	</main>
+</div>
+${pagination}
+
+<div id="comment">
+	<script src="https://giscus.app/client.js"
+	        data-repo="bendancom/Blog"
+	        data-repo-id="R_kgDOSDaOzg"
+	        data-category="Announcements"
+	        data-category-id="DIC_kwDOSDaOzs4C66D5"
+	        data-mapping="title"
+	        data-strict="0"
+	        data-reactions-enabled="1"
+	        data-emit-metadata="0"
+	        data-input-position="top"
+			data-theme=""preferred_color_scheme""
+			data-lang="${lang}"
+	        data-loading="lazy"
+	        crossorigin="anonymous"
+	        async>
+	</script>
+</div>

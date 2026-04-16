@@ -1,0 +1,18 @@
+a.archive-item {
+	display: none;
+	text-decoration: none;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+	padding: var(--space-sm);
+	border-radius: var(--radius);
+	height: 2.75rem;
+}
+
+a.archive-item:hover {
+	background-color: var(--btn-plain-bg-hover);
+}
+
+a.archive-full-title {
+	display: flex;
+}

@@ -1,0 +1,25 @@
+#navbar-logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: var(--primary);
+    text-decoration: none;
+	gap: 0.25rem;
+    padding: 0 1.25rem;
+    border-radius: var(--radius);
+    height: 3.25rem;
+}
+
+#navbar-logo:hover {
+    background: var(--btn-plain-bg-hover);
+}
+
+#navbar-logo:active {
+    transform: scale(0.95);
+}
+
+#navbar-logo svg {
+    font-size: 1.75rem;
+    margin-right: var(--space-sm);
+    margin-bottom: 0.25rem;
+}

@@ -1,0 +1,30 @@
+.post-card {
+	display: flex;
+	align-items: stretch;
+	justify-content: space-between;
+	width: 100%;
+	border-radius: var(--radius-large);
+	background-color: var(--card-bg);
+	box-sizing: border-box;
+	padding: var(--space-md);
+	padding-left: 2rem;
+}
+
+.post-card-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 3.25rem;
+	border-radius: 0.75rem;
+	text-decoration: none;
+	background-color: var(--btn-plain-bg-hover);
+}
+
+.post-card-link svg {
+	font-size: 2rem;
+}
+
+
+.post-card-link:hover {
+	background-color: var(--btn-regular-bg-hover);
+}

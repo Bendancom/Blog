@@ -5,6 +5,7 @@ function applyParams() {
 	for (var i = 0; i < single.length; i++) {
 		const category = single[i].getAttribute("data-category");
 		const tags = single[i].getAttribute("data-tags").split(" ");
+		const authors = single[i].getAttribute("data-authors").split(" ");
 
 		if (category != "" && params.get("category") != null) {
 			if (category != params.get("category")) {
@@ -13,6 +14,11 @@ function applyParams() {
 		}
 		if (tags.length > 0 && params.get("tag") != null) {
 			if (tags.indexOf(params.get("tag")) == -1) {
+				continue;
+			}
+		}
+		if (authors.length > 0 && params.get("author") != null) {
+			if (authors.indexOf(params.get("author")) == -1) {
 				continue;
 			}
 		}
@@ -27,6 +33,7 @@ function applyParams() {
 		for (var j = 0; j < seriesLinks.length; j++) {
 			const category = seriesLinks[j].getAttribute("data-category");
 			const tags = seriesLinks[j].getAttribute("data-tags").split(" ");
+			const authors = seriesLinks[j].getAttribute("data-authors").split(" ");
 
 			if (category != "" && params.get("category") != null) {
 				if (category != params.get("category")) {
@@ -38,6 +45,12 @@ function applyParams() {
 					continue;
 				}
 			}
+			if (authors.length > 0 && params.get("author") != null) {
+				if (authors.indexOf(params.get("author")) == -1) {
+					continue;
+				}
+			}
+
 			seriesLinks[j].style.display = "flex";
 			size++;
 		}
@@ -50,6 +63,7 @@ function applyParams() {
 		for (var j = 0; j < latestLinks.length; j++) {
 			const category = latestLinks[j].getAttribute("data-category");
 			const tags = latestLinks[j].getAttribute("data-tags").split(" ");
+			const authors = latestLinks[j].getAttribute("data-authors").split(" ");
 
 			if (category != "" && params.get("category") != null) {
 				if (category != params.get("category")) {
@@ -61,14 +75,20 @@ function applyParams() {
 					continue;
 				}
 			}
+			if (authors.length > 0 && params.get("author") != null) {
+				if (authors.indexOf(params.get("author")) == -1) {
+					continue;
+				}
+			}
+
 			if (link == null) {
 				link = latestLinks[j];
 			}
-			if (
-				new Date(link.getAttribute("data-date")) <
-				new Date(latestLinks[j].getAttribute("data-date"))
-			) {
-				link = latestLinks[j];
+				if (
+					new Date(link.getAttribute("data-date")) <
+					new Date(latestLinks[j].getAttribute("data-date"))
+				) {
+					link = latestLinks[j];
 			}
 		}
 		if (link != null) {
@@ -80,6 +100,7 @@ function applyParams() {
 		for (var j = 0; j < latestDates.length; j++) {
 			const category = latestDates[j].getAttribute("data-category");
 			const tags = latestDates[j].getAttribute("data-tags").split(" ");
+			const authors = latestDates[j].getAttribute("data-authors").split(" ");
 
 			if (category != "" && params.get("category") != null) {
 				if (category != params.get("category")) {
@@ -88,6 +109,11 @@ function applyParams() {
 			}
 			if (tags.length > 0 && params.get("tag") != null) {
 				if (tags.indexOf(params.get("tag")) == -1) {
+					continue;
+				}
+			}
+			if (authors.length > 0 && params.get("author") != null) {
+				if (authors.indexOf(params.get("author")) == -1) {
 					continue;
 				}
 			}

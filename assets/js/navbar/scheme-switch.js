@@ -25,16 +25,18 @@ function applyScheme(type) {
 	}
 
 	const giscus = document.querySelector("iframe.giscus-frame");
-	giscus.contentWindow.postMessage(
-		{
-			giscus: {
-				setConfig: {
-					theme: type == "system" ? "preferred_color_scheme" : type
+	if (giscus != null) {
+		giscus.contentWindow.postMessage(
+			{
+				giscus: {
+					setConfig: {
+						theme: type == "system" ? "preferred_color_scheme" : type
+					}
 				}
-			}
-		},
-		'https://giscus.app'
-	)
+			},
+			'https://giscus.app'
+		)
+	}
 }
 
 function schemeNext() {

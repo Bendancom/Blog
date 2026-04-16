@@ -450,6 +450,10 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
         tags = [f"<a href=\"/{metadata["lang"][0:2]}/archive/?tag={parse.quote(tag)}\">{tag}</a>" for tag in tags]
         tags = "<span class=\"tag-divider\">|</span>".join(tags)
 
+    authors = data.pop("authors",None)
+    if authors:
+        authors = [f"<a href=\"/{metadata["lang"][0:2]}/archive/?author={parse.quote(author)}\">{author}</a>" for author in authors]
+        authors = "<span class=\"author-divider\">|</span>".join(authors) 
 
     if lastModDate:
         lastModDate = lastModDate.strftime("%Y-%m-%d")
@@ -463,6 +467,7 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
                 "date": date,
                 "lastModDate": lastModDate,
                 "tags": tags if tags else "",
+                "authors": authors if authors else "",
                 "category": category if category else "",
                 "title": title,
                 "description": data["descriptionString"],
@@ -473,6 +478,7 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
                 **metadata,
                 "date": date,
                 "tags": tags if tags else "",
+                "authors": authors if authors else "",
                 "category": category if category else "",
                 "title": title,
                 "description": data["descriptionString"],
@@ -484,6 +490,8 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
         metas.append(meta["titleLink"])
     else:
         metas.append(meta["title"])
+    if authors:
+        metas.append(meta["authors"])
     metas.append(meta["date"])
     if lastModDate:
         metas.append(meta["lastModDate"])
@@ -613,6 +621,7 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
         componentStyles["metadata"]["subcss"]["description"],
         componentStyles["metadata"]["subcss"]["icon"],
         componentStyles["metadata"]["subcss"]["tags"],
+        componentStyles["metadata"]["subcss"]["authors"],
     ]
     styles.extend(defaultStyles)
 
@@ -666,6 +675,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
         componentStyles["metadata"]["subcss"]["description"],
         componentStyles["metadata"]["subcss"]["icon"],
         componentStyles["metadata"]["subcss"]["tags"],
+        componentStyles["metadata"]["subcss"]["authors"],
         componentStyles["pagination"]["css"],
         componentStyles["pagination"]["subcss"]["next"],
         componentStyles["pagination"]["subcss"]["previous"],
@@ -778,11 +788,6 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
         componentStyles["navbar"]["subcss"]["links"],
         componentStyles["navbar"]["subcss"]["logo"],
         componentStyles["navbar"]["subcss"]["mobile-menu"],
-        componentStyles["metadata"]["css"],
-        componentStyles["metadata"]["subcss"]["title"],
-        componentStyles["metadata"]["subcss"]["description"],
-        componentStyles["metadata"]["subcss"]["icon"],
-        componentStyles["metadata"]["subcss"]["tags"],
         componentStyles["series"]["css"],
         componentStyles["series"]["subcss"]["latest-link"],
         componentStyles["series"]["subcss"]["latest-date"],
@@ -806,6 +811,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                         "divider": "｜",
                         "category": one["category"],
                         "tags": " ".join(one["tags"]),
+                        "authors": " ".join(one["authors"]),
                         "premalink": f"/{one["premalink"]}",
                         "order": one["order"],
                         "latest": "latest" if data["latest"]["date"] == one["date"] else ""
@@ -815,6 +821,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                         "date": one["date"].strftime("%Y-%m-%d"),
                         "category": one["category"],
                         "tags": " ".join(one["tags"]),
+                        "authors": " ".join(one["authors"]),
                     }))
                 latestLinks.append(components["series"]["subcomponents"]["latest-link"]
                     .substitute({
@@ -823,6 +830,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                         "date": one["date"].strftime("%Y-%m-%d"),
                         "category": one["category"],
                         "tags": " ".join(one["tags"]),
+                        "authors": " ".join(one["authors"]),
                         "premalink": f"/{one["premalink"]}",
                         "order": one["order"]
                     }))
@@ -843,6 +851,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                 "date": data["latest"]["date"].strftime("%Y-%m-%d"),
                 "category": data["latest"]["category"],
                 "tags": " ".join(data["latest"]["tags"]),
+                "authors": " ".join(data["latest"]["authors"]),
                 "premalink": f"/{data["latest"]["premalink"]}"
             }))
 

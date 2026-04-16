@@ -616,7 +616,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
             case "zh":
                 lang = "zh-CN"
             case "en":
-                lang = "en-US"
+                lang = "en"
 
         post = postContainer.substitute({
             "lang": lang,
@@ -831,6 +831,7 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
     styles = [
         containerStyles["about"],
         componentStyles["sidebar"]["css"],
+        componentStyles["article"]["css"],
         componentStyles["navbar"]["css"],
         componentStyles["navbar"]["subcss"]["display-setting"],
         componentStyles["navbar"]["subcss"]["language-switch"],
@@ -873,9 +874,6 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
 def build():
     from shutil import copytree,rmtree
 
-    """Build the website."""
-    print("Building Fuwari website...")
-
     # Get metadata
     metadatas = defaultdict(list)
     alltags = defaultdict(set)
@@ -894,11 +892,13 @@ def build():
             about[lang]["metadata"] = metadata
             continue
         
-        alltags[lang].update(metadata["tags"])
-        if metadata["category"] in allcategories[lang]:
-            allcategories[lang][metadata["category"]] += 1
-        else:
-            allcategories[lang][metadata["category"]] = 1
+        if metadata["tags"] is not None:
+            alltags[lang].update(metadata["tags"])
+        if metadata["category"] is not None:
+            if metadata["category"] in allcategories[lang]:
+                allcategories[lang][metadata["category"]] += 1
+            else:
+                allcategories[lang][metadata["category"]] = 1
 
         metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
 
@@ -915,7 +915,11 @@ def build():
     # Generate Index
     generateTemplate(
         template=templates["index"],
-        component={},
+        component={
+            "supportLanguage": json.dumps(list(languagelist),ensure_ascii=False),
+            "defaultLanguage": config["info"]["defaultLanguage"],
+            "icon": config["info"]["icon"]
+        },
         metadata={"lang": ""},
         container="",
         outputFile= OUTPUT_DIR / "index.html"

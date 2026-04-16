@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html>
-	<script>
-		const language = localStorage.getItem("Language");
-		if (language != null) {
-			if (language == "system") {
-				window.location.replace(window.location.href + navigator.language.substring(0,2));
+	<head>
+		<link rel="icon" href="${icon}">
+		<script>
+			const supportLanguage = ${supportLanguage};
+			let language = localStorage.getItem("Language");
+			let url;
+			if (language != null) {
+				if (language == "system") {
+					language = navigator.language.substring(0,2);
+				}
 			}
 			else {
-				window.location.replace(window.location.href + language);
+				localStorage.setItem("Language","system");
+				language = navigator.language.substring(0,2);
 			}
-		}
-		else {
-			localStorage.setItem("Language","system");
-			window.location.replace(window.location.href + navigator.language.substring(0,2));
-		}
-	</script>
+			if (supportLanguage.indexOf(language) == -1) {
+				url = window.location.href + ${defaultLanguage};
+			}
+			else {
+				url = window.location.href + language;
+			}
+			window.location.replace(url);
+		</script>
+	</head>
 </html>

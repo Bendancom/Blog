@@ -1111,7 +1111,7 @@ def build():
     copytree(ASSETS_DIR, OUTPUT_DIR / "assets")
 
     if len(sys.argv) >= 2 and sys.argv[1] == "deploy":
-        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = {config["info"]["subroot"]}",encoding="UTF-8")
+        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"{config["info"]["subroot"]}\"",encoding="UTF-8")
     else:
         Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"\"",encoding="UTF-8")
 

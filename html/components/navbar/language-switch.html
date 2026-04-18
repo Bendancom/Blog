@@ -1,4 +1,4 @@
-<button id="language-switch" onclick="languageNext()">
+<button id="language-switch">
 	${languageShortName}
 </button>
 
@@ -17,5 +17,7 @@
 	
 		document.getElementById("language-switch-menu").getElementsByClassName("current")[0].classList.remove("current");
 		document.getElementById("language-switch-menu").getElementsByClassName(language)[0].classList.add("current");
+	} else {
+		localStorage.setItem("Language", "${defaultLanguage}")
 	}
 </script>

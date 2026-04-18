@@ -1,4 +1,5 @@
-function switchDisplaySetting(){
+const switchButton = document.getElementById("display-settings-switch");
+switchButton.addEventListener("click", () => {
 	const setting = document.getElementById("display-setting");
 	const Input = document.getElementById("hue-slider");
 	const Show = document.getElementById("display-setting-hue");
@@ -9,27 +10,19 @@ function switchDisplaySetting(){
 		Input.value = hue;
 	}
 
-	if (setting.classList.contains("hidden")) {
-		setting.style.display = "flex";
-		setting.classList.remove("hidden");
+	if (setting.classList.toggle("hidden")) {
+		setting.style.display = "none";
 	}
 	else {
-		setting.style.display = "none";
-		setting.classList.add("hidden");
+		setting.style.display = "flex";
 	}
-}
+});
 
-function setHue() {
-	const Input = document.getElementById("hue-slider");
-	const Show = document.getElementById("display-setting-hue");
-	localStorage.setItem("Hue",Input.value);
-	Show.textContent = Input.value;
-	document.documentElement.style.setProperty("--hue",Input.value);
-}
-
-(function() {
-	const hue = localStorage.getItem("Hue")
-	if (hue != null) {
-		document.documentElement.style.setProperty("--hue",hue);
-	}
-})()
+const input = document.getElementById("hue-slider");
+input.addEventListener("volumechange", (e) => {
+	const hue = e.target.value;
+	const show = document.getElementById("display-setting-hue");
+	localStorage.setItem("Hue", hue);
+	show.textContent = hue;
+	document.documentElement.style.setProperty("--hue",hue);
+})

@@ -1,11 +1,25 @@
 [info]
 email = "bendancom@qq.com"  # Author email
 url = "https://bendancom.github.io"  # Site URL
+subroot = "Blog"
 icon = "/assets/image/favicon.ico"
 avatar = "/assets/image/avatar.png"
 defaultLanguage = "zh"
 bilibili = "https://space.bilibili.com/43229292"
 github = "https://github.com/Bendancom"
+
+[comment]
+repo = "bendancom/Blog"
+repoId = "R_kgDOSDaOzg"
+repoCategory="Announcements"
+repoCategoryId="DIC_kwDOSDaOzs4C66D5"
+mapping="title"
+strict="0"
+reactionEnabled="1"
+emitMetadata="0"
+inputPosition="top"
+loading="lazy"
+crossorigin="anonymous"
 
 [copyright]
 sign = "©"

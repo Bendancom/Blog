@@ -12,20 +12,34 @@
 ${pagination}
 
 <div id="comment">
-	<script src="https://giscus.app/client.js"
-	        data-repo="bendancom/Blog"
-	        data-repo-id="R_kgDOSDaOzg"
-	        data-category="Announcements"
-	        data-category-id="DIC_kwDOSDaOzs4C66D5"
-	        data-mapping="title"
-	        data-strict="0"
-	        data-reactions-enabled="1"
-	        data-emit-metadata="0"
-	        data-input-position="top"
-			data-theme=""preferred_color_scheme""
-			data-lang="${lang}"
-	        data-loading="lazy"
-	        crossorigin="anonymous"
-	        async>
+	<script>
+		(() => {
+			const current = document.currentScript;
+			let type = localStorage.getItem("Scheme")
+			if (type == null) {
+				localStorage.setItem("Scheme", "system");
+				type = "system"
+			}
+
+			const newScript = document.createElement("script");
+			newScript.src = "https://giscus.app/client.js"
+			newScript.setAttribute("data-repo", "${repo}")
+			newScript.setAttribute("data-repo-id", "${repoId}")
+			newScript.setAttribute("data-category", "${repoCategory}")
+			newScript.setAttribute("data-category-id", "${repoCategoryId}")
+			newScript.setAttribute("data-mapping", "${mapping}")
+			newScript.setAttribute("data-strict", "${strict}")
+			newScript.setAttribute("data-reaction-enabled", "${reactionEnabled}")
+			newScript.setAttribute("data-emit-metadata", "${emitMetadata}")
+			newScript.setAttribute("data-input-position", "${inputPosition}")
+			newScript.setAttribute("data-theme", type == "system" ? "preferred_color_scheme" : type)
+			newScript.setAttribute("data-lang", "${lang}")
+			newScript.setAttribute("data-loading", "${loading}")
+			newScript.setAttribute("crossorigin", "${crossorigin}")
+			newScript.async = true;
+
+			current.parentNode.appendChild(newScript);
+		}) ()
 	</script>
 </div>
+

@@ -5,5 +5,32 @@
 	${js}
 	${style}
 	<link rel="icon" href="${icon}">
-	<link rel="alternate" type="application/atom+xml" title="${siteTitle} - Atom ${feed}" href="/${lang}/feed.atom">
+	<link rel="alternate" type="application/atom+xml" title="${siteTitle} - Atom ${feed}" href="${feedFile}">
+
+	<script>
+		(() => {
+			const hue = localStorage.getItem("Hue")
+			if (hue != null) {
+				document.documentElement.style.setProperty("--hue",hue);
+			}
+
+			let scheme = localStorage.getItem("Scheme");
+			if (scheme == null){
+				scheme = "system";
+				localStorage.setItem("Scheme","system");
+			}
+
+			switch(scheme) {
+				case "light":
+					document.documentElement.setAttribute("data-theme", "light");
+					break;
+				case "dark":
+					document.documentElement.setAttribute("data-theme", "dark");
+					break;
+				case "system":
+					document.documentElement.setAttribute("data-theme", "system");
+					break;
+			}
+		})()
+	</script>
 </head>

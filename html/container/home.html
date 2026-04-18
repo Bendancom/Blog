@@ -6,7 +6,37 @@
 	(function(){
 		const type = localStorage.getItem("Selector");
 		if (type != null) {
-			selectorSwitch(type);
+			const single = document.getElementsByClassName("archive-item-wrapper single");
+			const series = document.getElementsByClassName("archive-item-wrapper series");
+
+			switch (type) {
+				case "single":
+					for (var i = 0; i < single.length; i++) {
+						single[i].style.display = "block";
+					}
+					for (var i =0; i < series.length; i++) {
+						series[i].style.display = "none";
+					}
+					break;
+				case "series":
+					for (var i =0; i < single.length; i++) {
+						single[i].style.display = "none";
+					}
+					for (var i =0; i < series.length; i++) {
+						series[i].style.display = "block";
+					}
+					break;
+				case "all":
+					for (var i =0; i < single.length; i++) {
+						single[i].style.display = "block";
+					}
+					for (var i =0; i < series.length; i++) {
+						series[i].style.display = "block";
+					}
+					break;
+			}
+		} else {
+			localStorage.setItem("Selector","all");
 		}
 	})();
 </script>

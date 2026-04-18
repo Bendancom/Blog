@@ -7,11 +7,6 @@ function schemeSwitch(type) {
 	menu.getElementsByClassName("current")[0].classList.remove("current");
 	menu.getElementsByClassName(type)[0].classList.add("current");
 
-	applyScheme(type);
-	localStorage.setItem("Scheme", type);
-}
-
-function applyScheme(type) {
 	switch(type) {
 		case "light":
 			document.documentElement.setAttribute("data-theme", "light");
@@ -37,9 +32,11 @@ function applyScheme(type) {
 			'https://giscus.app'
 		)
 	}
+	localStorage.setItem("Scheme", type);
 }
 
-function schemeNext() {
+const switchButton = document.getElementById("scheme-switch");
+switchButton.addEventListener("click", () => {
 	const next = document.getElementById("scheme-switch").getElementsByClassName("current")[0].nextElementSibling;
 	if (next != null) {
 		schemeSwitch(next.classList[0])
@@ -47,15 +44,11 @@ function schemeNext() {
 	else {
 		schemeSwitch(document.getElementById("scheme-switch").children[0].classList[0])
 	}
-}
+})
 
-(function () {
-	const scheme = localStorage.getItem("Scheme");
-	if (scheme != null){
-		applyScheme(scheme)
-	}
-	else {
-		applyScheme("system")
-		localStorage.setItem("Scheme","system")
-	}
-})();
+const buttons = document.getElementById("scheme-switch-menu").getElementsByTagName("button");
+for (var i = 0; i < buttons.length; i++) {
+	buttons[i].addEventListener("click", (e) => {
+		schemeSwitch(e.target.classList[0])
+	})
+}

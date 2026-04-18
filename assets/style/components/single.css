@@ -1,5 +1,5 @@
 a.archive-item {
-	display: none;
+	display: flex;
 	text-decoration: none;
 	justify-content: space-between;
 	align-items: center;

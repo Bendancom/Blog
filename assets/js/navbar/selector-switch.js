@@ -1,4 +1,12 @@
-function applySelector(type){
+export function selectorSwitch(type) {
+	document.getElementById("selector-switch").getElementsByClassName("current")[0].classList.remove("current")
+	document.getElementById("selector-switch-menu").getElementsByClassName("current")[0].classList.remove("current")
+
+	document.getElementById("selector-switch").getElementsByClassName(type)[0].classList.add("current")
+	document.getElementById("selector-switch-menu").getElementsByClassName(type)[0].classList.add("current")
+
+	localStorage.setItem("Selector",type);
+
 	const single = [ ...document.getElementsByClassName("post-card-wrapper single"), ...document.getElementsByClassName("archive-item-wrapper single")]
 	const series = [ ...document.getElementsByClassName("post-card-wrapper series"), ...document.getElementsByClassName("archive-item-wrapper series")]
 
@@ -30,17 +38,6 @@ function applySelector(type){
 	}
 }
 
-function selectorSwitch(type) {
-	document.getElementById("selector-switch").getElementsByClassName("current")[0].classList.remove("current")
-	document.getElementById("selector-switch-menu").getElementsByClassName("current")[0].classList.remove("current")
-
-	document.getElementById("selector-switch").getElementsByClassName(type)[0].classList.add("current")
-	document.getElementById("selector-switch-menu").getElementsByClassName(type)[0].classList.add("current")
-
-	localStorage.setItem("Selector",type);
-	applySelector(type);
-}
-
 function selectorNext() {
 	const next = document.getElementById("selector-switch").getElementsByClassName("current")[0].nextElementSibling;
 
@@ -50,4 +47,14 @@ function selectorNext() {
 	else {
 		selectorSwitch(document.getElementById("selector-switch").children[0].classList[0]);
 	}
+}
+
+const nextButton = document.getElementById("selector-switch")
+nextButton.addEventListener("click", selectorNext)
+const buttons = document.getElementById("selector-switch-menu").getElementsByTagName("button")
+
+for (var i = 0; i < buttons.length; i++) {
+	buttons[i].addEventListener("click", (e) => {
+		selectorSwitch(e.target.classList[0])
+	})
 }

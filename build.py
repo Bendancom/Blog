@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import json
+import sys
 
 from urllib import parse
 from datetime import datetime
@@ -24,37 +25,193 @@ ASSETS_DIR = BASE_DIR / "assets"
 OUTPUT_DIR = BASE_DIR / "public"
 CACHE_DIR = BASE_DIR / "cache"
 
-componentStyles = {}
-for file in (ASSETS_DIR / "style" / "components").iterdir():
-    componentStyles[file.stem] = {}
-    if file.is_dir():
-        componentStyles[file.stem]["css"] = f"<link rel=\"stylesheet\" type=\"text/css\" href=\"/{(file.relative_to(BASE_DIR) / file.with_suffix(".css").name)}\">"
-        componentStyles[file.stem]["subcss"] = {}
-        for subbfile in file.rglob("*.css"):
-            componentStyles[file.stem]["subcss"][subbfile.stem] = f"<link rel=\"stylesheet\" type=\"text/css\" href=\"/{ subbfile.relative_to(BASE_DIR) }\">"
-    else:
-        componentStyles[file.stem]["css"] = f"<link rel=\"stylesheet\" type=\"text/css\" href=\"/{file.relative_to(BASE_DIR).with_suffix(".css")}\">"
-
-containerStyles = {}
-for file in (ASSETS_DIR / "style" / "container").iterdir():
-    containerStyles[file.stem] = f"<link rel=\"stylesheet\" type=\"text/css\" href=\"/{file.relative_to(BASE_DIR)}\">"
-
-defaultStyles = []
-for file in (ASSETS_DIR / "style").glob("*.css"):
-    defaultStyles.append(f"<link rel=\"stylesheet\" type=\"text/css\" href=\"/{file.relative_to(BASE_DIR)}\">")
-
-javascripts = {}
-for file in (ASSETS_DIR / "js").rglob("*.js"):
-    match file.stem:
-        case "find":
-            javascripts[file.stem] = f"<script type=\"module\" src=\"/{file.relative_to(BASE_DIR)}\"></script>"
-        case _:
-            javascripts[file.stem] = f"<script src=\"/{file.relative_to(BASE_DIR)}\"></script>"
-
 with open(BASE_DIR / "config.toml","rb") as f:
     config = load(f)
 with open(BASE_DIR / "lang.toml","rb") as f:
     language = load(f)
+
+def urljoin(root) -> str:
+    temp = str(root)
+
+    url = parse.urlparse(temp)
+    if all([url.scheme, url.netloc]):
+        return temp
+
+    if len(sys.argv) >= 2:
+        if sys.argv[1] == "deploy":
+            if not "subroot" in config["info"] or config["info"]["subroot"] == "":
+                return temp
+            else:
+                subroot = config["info"]["subroot"].replace("/","")
+                if temp[0] != "/":
+                    return f"/{subroot}/{temp}"
+                else:
+                    return f"/{subroot}{temp}"
+        else:
+            if temp[0] != "/":
+                return f"/{temp}"
+            else:
+                return temp
+    else: 
+        if temp[0] != "/":
+            return f"/{temp}"
+        else:
+            return temp
+
+def generateStyle(path: str) -> str:
+    return f"<link rel=\"stylesheet\" type=\"text/css\" href=\"{urljoin(path)}\">"
+
+def generateJS(path: str, module: bool):
+    if module:
+        return f"<script type=\"module\" src=\"{urljoin(path)}\"></script>"
+    else:
+        return f"<script src=\"{urljoin(path)}\"></script>"
+
+componentStyles = {}
+for file in (ASSETS_DIR / "style" / "components").iterdir():
+    componentStyles[file.stem] = {}
+    if file.is_dir():
+        componentStyles[file.stem]["css"] = generateStyle(file.relative_to(BASE_DIR) / file.with_suffix(".css").name)
+        componentStyles[file.stem]["subcss"] = {}
+        for subfile in file.rglob("*.css"):
+            componentStyles[file.stem]["subcss"][subfile.stem] = generateStyle(subfile.relative_to(BASE_DIR))
+    else:
+        componentStyles[file.stem]["css"] = generateStyle(file.relative_to(BASE_DIR).with_suffix(".css"))
+
+containerStyles = {}
+for file in (ASSETS_DIR / "style" / "container").iterdir():
+    containerStyles[file.stem] = generateStyle(file.relative_to(BASE_DIR))
+
+defaultStyles = []
+for file in (ASSETS_DIR / "style").glob("*.css"):
+    defaultStyles.append(generateStyle(urljoin(file.relative_to(BASE_DIR))))
+
+javascripts = {}
+for file in (ASSETS_DIR / "js").rglob("*.js"):
+    javascripts[file.stem] = generateJS(file.relative_to(BASE_DIR),module=True)
+
+Styles = {
+    "Home": [
+        containerStyles["home"],
+
+        componentStyles["navbar"]["css"],
+        componentStyles["navbar"]["subcss"]["logo"],
+        componentStyles["navbar"]["subcss"]["links"],
+        componentStyles["navbar"]["subcss"]["display-setting"],
+        componentStyles["navbar"]["subcss"]["selector-switch"],
+        componentStyles["navbar"]["subcss"]["language-switch"],
+        componentStyles["navbar"]["subcss"]["scheme-switch"],
+        componentStyles["navbar"]["subcss"]["mobile-menu"],
+
+        componentStyles["sidebar"]["css"],
+        componentStyles["postcard"]["css"],
+
+        componentStyles["metadata"]["css"], 
+        componentStyles["metadata"]["subcss"]["title"],
+        componentStyles["metadata"]["subcss"]["icon"],
+        componentStyles["metadata"]["subcss"]["authors"],
+        componentStyles["metadata"]["subcss"]["tags"],
+        componentStyles["metadata"]["subcss"]["description"],
+
+        *defaultStyles,
+    ],
+    "Post": [
+        containerStyles["post"], 
+
+        componentStyles["navbar"]["css"],
+        componentStyles["navbar"]["subcss"]["logo"],
+        componentStyles["navbar"]["subcss"]["links"],
+        componentStyles["navbar"]["subcss"]["find"],
+        componentStyles["navbar"]["subcss"]["display-setting"],
+        componentStyles["navbar"]["subcss"]["scheme-switch"],
+        componentStyles["navbar"]["subcss"]["mobile-menu"],
+     
+        componentStyles["sidebar"]["css"], 
+
+        componentStyles["metadata"]["css"], 
+        componentStyles["metadata"]["subcss"]["title"],
+        componentStyles["metadata"]["subcss"]["icon"],
+        componentStyles["metadata"]["subcss"]["authors"],
+        componentStyles["metadata"]["subcss"]["tags"],
+        componentStyles["metadata"]["subcss"]["description"],
+
+        componentStyles["article"]["css"], 
+
+        componentStyles["pagination"]["css"],
+        componentStyles["pagination"]["subcss"]["next"], 
+        componentStyles["pagination"]["subcss"]["previous"],
+
+        *defaultStyles,
+    ],
+    "Archive": [
+        containerStyles["archive"],
+
+        componentStyles["navbar"]["css"],
+        componentStyles["navbar"]["subcss"]["logo"],
+        componentStyles["navbar"]["subcss"]["links"],
+        componentStyles["navbar"]["subcss"]["display-setting"],
+        componentStyles["navbar"]["subcss"]["selector-switch"],
+        componentStyles["navbar"]["subcss"]["language-switch"],
+        componentStyles["navbar"]["subcss"]["scheme-switch"],
+        componentStyles["navbar"]["subcss"]["mobile-menu"],
+
+        componentStyles["sidebar"]["css"],
+        componentStyles["single"]["css"],
+
+        componentStyles["series"]["css"],
+        componentStyles["series"]["subcss"]["latest-link"],
+        componentStyles["series"]["subcss"]["latest-date"], 
+        componentStyles["series"]["subcss"]["series-link"],
+        
+        *defaultStyles,
+    ],
+    "About": [
+        containerStyles["about"], 
+
+        componentStyles["navbar"]["css"],
+        componentStyles["navbar"]["subcss"]["logo"],
+        componentStyles["navbar"]["subcss"]["links"],
+        componentStyles["navbar"]["subcss"]["display-setting"],
+        componentStyles["navbar"]["subcss"]["language-switch"],
+        componentStyles["navbar"]["subcss"]["scheme-switch"],
+        componentStyles["navbar"]["subcss"]["mobile-menu"],
+
+        componentStyles["sidebar"]["css"],
+        componentStyles["article"]["css"], 
+
+        *defaultStyles,
+    ]
+}
+
+JS = {
+    "Home": [
+        javascripts["display-setting"],
+        javascripts["selector-switch"],
+        javascripts["language-switch"],
+        javascripts["scheme-switch"],
+        javascripts["mobile-switch"],
+    ],
+    "Post": [
+        generateJS("https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js",module=False),
+        javascripts["find"],
+        javascripts["display-setting"],
+        javascripts["scheme-switch"],
+        javascripts["mobile-switch"],
+    ],
+    "Archive": [
+        javascripts["display-setting"],
+        javascripts["selector-switch"],
+        javascripts["language-switch"],
+        javascripts["scheme-switch"],
+        javascripts["mobile-switch"],
+    ],
+    "About": [
+        javascripts["display-setting"], 
+        javascripts["language-switch"], 
+        javascripts["scheme-switch"],
+        javascripts["mobile-switch"],
+    ]
+}
 
 templates = {}
 for file in (HTML_DIR / "template").rglob("*"):
@@ -163,7 +320,7 @@ def getMetadata(file: Path) -> dict:
                     return " "
             if text:
                 if len(data) > 0:
-                    # return f"#{func}(\"{text}\" {"," + ",".join(data)})"
+                    return f"#{func}(\"{text}\", {",".join(f"{k}: {str(v).lower()}" for k,v in data.items())})"
                     return f"#{func}(\"{text}\")"
                 else:
                     return f"#{func}(\"{text}\")"
@@ -211,7 +368,7 @@ def getMetadata(file: Path) -> dict:
 
     metadata["titleString"] = getString(metadata["title"])
     metadata["title"] = compileTypstStr("".join(metadata["title"]))
-    metadata["premalink"] = Path(f"{metadata["lang"][0:2]}/posts")
+    metadata["premalink"] = Path(f"{metadata['lang'][0:2]}/posts")
     if metadata["order"] is not None:
         metadata["premalink"] = metadata["premalink"] / "series"
     else:
@@ -320,7 +477,8 @@ def generateSEO(metadata: dict) -> str:
     
     full_title = f"{title}｜{subtitle}" if subtitle else title
     
-    url = f"{config["info"]["url"]}/{lang}/{title}/{subtitle}" if subtitle else f"{config["info"]["url"]}/{lang}/{title}"   
+    path = f"/{lang}/{title}/{subtitle}" if subtitle else f"/{lang}/{title}"
+    url = f"{config['info']['url']}{urljoin(path)}"
 
     seo_tags = [
         f'<title>{full_title}</title>',
@@ -338,13 +496,13 @@ def generateSEO(metadata: dict) -> str:
         seo_tags.append(f'<meta property="og:type" content="website">')
 
     if lastmoddate or date:
-        seo_tags.append(f'<meta name="date" content="{lastmoddate.strftime("%Y-%m-%d") if lastmoddate else date.isoformat()}">')
+        seo_tags.append(f'<meta name="date" content="{lastmoddate.strftime("%Y-%m-%d") if lastmoddate else date.strftime("%Y-%m-%d")}">')
     if tags:
         seo_tags.append(f'<meta name="keywords" content="{tags}">')
     if category:
         seo_tags.append(f'<meta name="category" content="{category}">')
     if date:
-        f'<meta property="article:published_time" content="{date.strftime("%Y-%m-%d")}">'
+        seo_tags.append(f'<meta property="article:published_time" content="{date.strftime("%Y-%m-%d")}">')
     if image:
         seo_tags.append(f'<meta property="og:image" content="{image}">')
 
@@ -356,10 +514,11 @@ def generateHead(metadata: dict, js: list, styles: list,haveSEO:bool) -> str:
         "SEO": generateSEO(metadata) if haveSEO else "",
         "style": "\n".join(styles),
         "url": config["info"]["url"],
-        "icon": config["info"]["icon"],
+        "icon": urljoin(config["info"]["icon"]),
         "lang": metadata["lang"][0:2],
         "siteTitle": language["config"][metadata["lang"][0:2]]["siteTitle"],
-        "feed": language["config"][metadata["lang"][0:2]]["feed"]
+        "feed": language["config"][metadata["lang"][0:2]]["feed"],
+        "feedFile": urljoin(f"{metadata['lang'][0:2]}/feed.atom")
     })
 
 def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bool,languageList: list) -> dict:
@@ -371,15 +530,16 @@ def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bo
                 languageName = []
                 for lang in languageList:
                     if lang == config["info"]["defaultLanguage"]:
-                        languageName.append(f"<button class=\"{lang} current\" onclick=\"languageSwitch('{lang}')\">{language["config"][lang]["languageName"]}</button>")
+                        languageName.append(f"<button class=\"{lang} current\">{language["config"][lang]["languageName"]}</button>")
                         languageShortName.append(f"<div class=\"{lang} current\">{language["config"][lang]["languageShortName"]}</div>")
                     else:
-                        languageName.append(f"<button class=\"{lang}\" onclick=\"languageSwitch('{lang}')\">{language["config"][lang]["languageName"]}</button>")
+                        languageName.append(f"<button class=\"{lang}\">{language["config"][lang]["languageName"]}</button>")
                         languageShortName.append(f"<div class=\"{lang}\">{language["config"][lang]["languageShortName"]}</div>")
                 navbar[key] = value.substitute({
                     "languageShortName": "\n".join(languageShortName),
                     "languageName": "\n".join(languageName),
-                    "system": language["config"][metadata["lang"][0:2]]["system"]
+                    "system": language["config"][metadata["lang"][0:2]]["system"],
+                    "defaultLanguage": config["info"]["defaultLanguage"]
                 })
             case _:
                 navbar[key] = value.substitute({
@@ -408,11 +568,11 @@ def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bo
 def generateSideBar(metadata: dict,alltags: list,allcategories: dict) -> str:
     htmlCategories = []
     for key,value in allcategories.items():
-        htmlCategories.append(f'<a href="/{metadata["lang"][0:2]}/archive/?category={parse.quote(key)}" class="category-item"><span class="category-name">{key}</span><span class="category-count">{value}</span></a>')
+        htmlCategories.append(f'<a href="{urljoin("/" + metadata["lang"][0:2] + "/archive/?category=" + parse.quote(key))}" class="category-item"><span class="category-name">{key}</span><span class="category-count">{value}</span></a>')
 
     htmlTags = []
     for tag in alltags:
-        htmlTags.append(f'<a href="/{metadata["lang"][0:2]}/archive/?tag={parse.quote(tag)}" class="tag">{tag}</a>')
+        htmlTags.append(f'<a href="{urljoin("/" + metadata["lang"][0:2] + "/archive/?tag=" + parse.quote(tag))}" class="tag">{tag}</a>')
 
     sidebar = {}
     for key,value in components["sidebar"]["subcomponents"].items():
@@ -442,22 +602,22 @@ def generateMetadata(metadata: dict,TitleLink: bool) -> str:
     
     category = data.pop("category",None)
     if category:
-        category = f"<a href=\"/{metadata["lang"][0:2]}/archive/?category={parse.quote(category)}\">{category}</a>"
+        category = f"<a href=\"{urljoin('/' + metadata['lang'][0:2] + '/archive/?category=' + parse.quote(category))}\">{category}</a>"
 
     tags = data.pop("tags",None)
     if tags:
-        tags = [f"<a href=\"/{metadata["lang"][0:2]}/archive/?tag={parse.quote(tag)}\">{tag}</a>" for tag in tags]
+        tags = [f"<a href=\"{urljoin('/' + metadata['lang'][0:2] + '/archive/?tag=' + parse.quote(tag))}\">{tag}</a>" for tag in tags]
         tags = "<span class=\"tag-divider\">|</span>".join(tags)
 
     authors = data.pop("authors",None)
     if authors:
-        authors = [f"<a href=\"/{metadata["lang"][0:2]}/archive/?author={parse.quote(author)}\">{author}</a>" for author in authors]
+        authors = [f"<a href=\"{urljoin('/' + metadata['lang'][0:2] + '/archive/?author=' + parse.quote(author))}\">{author}</a>" for author in authors]
         authors = "<span class=\"author-divider\">|</span>".join(authors) 
 
     if lastModDate:
         lastModDate = lastModDate.strftime("%Y-%m-%d")
 
-    premalink = f"/{data.pop("premalink")}"
+    premalink = urljoin(data.pop("premalink"))
 
     for key,value in components["metadata"]["subcomponents"].items():
         if lastModDate and key == "lastModDate":
@@ -517,18 +677,22 @@ def generateFeed(lang: str,metadatas: list) -> str:
             entry.append(f"<subtitle>{metadata["subtitleString"]}</subtitle>")
         for author in metadata["authors"]:
             entry.append(f"<author><name>{author}</name></author>")
-        entry.append(f"<link href=\"{config["info"]["url"]}/{metadata["premalink"]}\"/>")
-        entry.append(f"<id>{config["info"]["url"]}/{metadata["premalink"]}</id>")
+        entry.append(
+            f"<link href=\"{config['info']['url']}{urljoin(metadata['premalink'])}\"/>"
+        )
+        entry.append(
+            f"<id>{config['info']['url']}{urljoin(metadata['premalink'])}</id>"
+        )
         entry.append(f"<published>{metadata["date"].strftime("%Y-%m-%d")}</published>")
         if metadata["lastModDate"]:
             entry.append(f"<updated>{metadata["lastModDate"].strftime("%Y-%m-%d")}</updated>")
         else:
             entry.append(f"<updated>{metadata["date"].strftime("%Y-%m-%d")}</updated>")
         if metadata["order"] is not None:
-            entry.append(f"<category term=\"{language["config"][lang]["series"]}\" scheme=\"{config["info"]["url"]}/{lang}/posts/\"/>")
-            entry.append(f"<category term=\"{metadata["titleString"]}\" scheme=\"{config["info"]["url"]}/{lang}/posts/series/\"/>")
+            entry.append(f"<category term=\"{language['config'][lang]['series']}\" scheme=\"{config['info']['url']}{urljoin(f'/{lang}/posts/')}\"/>")
+            entry.append(f"<category term=\"{metadata['titleString']}\" scheme=\"{config['info']['url']}{urljoin(f'/{lang}/posts/series/')}\"/>")
         else:
-            entry.append(f"<category term=\"{language["config"][lang]["single"]}\" scheme=\"{config["info"]["url"]}/{lang}/posts/\"/>")
+            entry.append(f"<category term=\"{language['config'][lang]['single']}\" scheme=\"{config['info']['url']}{urljoin(f'/{lang}/posts/')}\"/>")
 
         if metadata["descriptionString"]:
             entry.append(f"<summary>{metadata["descriptionString"]}</summary>")
@@ -543,11 +707,11 @@ def generateFeed(lang: str,metadatas: list) -> str:
     feed.append(f"<feed xmlns=\"http://www.w3.org/2005/Atom\" xml:lang=\"{lang}\">")
     feed.append(f"<title>{language["config"][lang]["siteTitle"]}</title>")
     feed.append(f"<subtitle>{language["config"][lang]["siteDescription"]}</subtitle>")
-    feed.append(f"<link href=\"{config["info"]["url"]}/{lang}\"/>")
-    feed.append(f"<link href=\"{config["info"]["url"]}/{lang}/feed.atom\" rel=\"self\"/>")
-    feed.append(f"<id>{config["info"]["url"]}/{lang}/</id>")
+    feed.append(f"<link href=\"{config['info']['url']}{urljoin(f'/{lang}')}\"/>")
+    feed.append(f"<link href=\"{config['info']['url']}{urljoin(f'/{lang}/feed.atom')}\" rel=\"self\"/>")
+    feed.append(f"<id>{config['info']['url']}{urljoin(f'/{lang}/')}</id>")
     feed.append(f"<updated>{latest_date.strftime("%Y-%m-%d")}</updated>")
-    feed.append(f"<icon>{config["info"]["url"]}/{config["info"]["icon"]}</icon>")
+    feed.append(f"<icon>{config['info']['url']}{urljoin(config['info']['icon'])}</icon>")
     feed.extend(entries)
     feed.append("</feed>")
     
@@ -573,7 +737,7 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
         cards.append(components["postcard"]["template"].substitute({
             "metadata": generateMetadata(data,TitleLink=True),
             "link": components["postcard"]["subcomponents"]["symbollink"].substitute({
-                "premalink": f"/{data["premalink"]}"
+                "premalink": urljoin(data["premalink"])
             }),
             "type": "series" if data["order"] is not None else "single"
         }))
@@ -585,46 +749,18 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
         "descriptionString": language["config"][lang]["siteDescription"],
         "category": None,
         "tags": None,
-        "image": f"{config["info"]["url"]}/assets/image/avatar.png"
+        "image": f"{config['info']['url']}{urljoin('/assets/image/avatar.png')}"
     }
 
     home = homeContainer.substitute({
         "postCards": "\n".join(cards)
     })
 
-    js = [
-        javascripts["language-switch"],
-        javascripts["display-setting"],
-        javascripts["scheme-switch"],
-        javascripts["selector-switch"]
-    ]
-
-    styles = [
-        containerStyles["home"],
-        componentStyles["sidebar"]["css"],
-        componentStyles["postcard"]["css"],
-        componentStyles["navbar"]["css"],
-        componentStyles["navbar"]["subcss"]["display-setting"],
-        componentStyles["navbar"]["subcss"]["language-switch"],
-        componentStyles["navbar"]["subcss"]["scheme-switch"],
-        componentStyles["navbar"]["subcss"]["selector-switch"],
-        componentStyles["navbar"]["subcss"]["links"],
-        componentStyles["navbar"]["subcss"]["logo"],
-        componentStyles["navbar"]["subcss"]["mobile-menu"],
-        componentStyles["metadata"]["css"],
-        componentStyles["metadata"]["subcss"]["title"],
-        componentStyles["metadata"]["subcss"]["description"],
-        componentStyles["metadata"]["subcss"]["icon"],
-        componentStyles["metadata"]["subcss"]["tags"],
-        componentStyles["metadata"]["subcss"]["authors"],
-    ]
-    styles.extend(defaultStyles)
-
     component = {
         "head": generateHead(
             metadata,
-            js,
-            styles,
+            JS["Home"],
+            Styles["Home"],
             haveSEO=True
         ),
         "navbar": generateNavbar(
@@ -646,37 +782,6 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
     )
 
 def generatePosts(metadatas: list,alltags: list,allcategories: dict):
-    js = [
-        "<script src=\"https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js\"></script>",
-        javascripts["find"],
-        javascripts["display-setting"],
-        javascripts["scheme-switch"],
-    ]
-
-    styles = [
-        containerStyles["post"],
-        componentStyles["article"]["css"],
-        componentStyles["sidebar"]["css"],
-        componentStyles["postcard"]["css"],
-        componentStyles["navbar"]["css"],
-        componentStyles["navbar"]["subcss"]["display-setting"],
-        componentStyles["navbar"]["subcss"]["find"],
-        componentStyles["navbar"]["subcss"]["scheme-switch"],
-        componentStyles["navbar"]["subcss"]["links"],
-        componentStyles["navbar"]["subcss"]["logo"],
-        componentStyles["navbar"]["subcss"]["mobile-menu"],
-        componentStyles["metadata"]["css"],
-        componentStyles["metadata"]["subcss"]["title"],
-        componentStyles["metadata"]["subcss"]["description"],
-        componentStyles["metadata"]["subcss"]["icon"],
-        componentStyles["metadata"]["subcss"]["tags"],
-        componentStyles["metadata"]["subcss"]["authors"],
-        componentStyles["pagination"]["css"],
-        componentStyles["pagination"]["subcss"]["next"],
-        componentStyles["pagination"]["subcss"]["previous"],
-    ]
-    styles.extend(defaultStyles)
-
     def Post(metadata,pagination):
         outputFile = OUTPUT_DIR / metadata["premalink"] / "index.html"
 
@@ -699,14 +804,15 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
             "category": metadata["category"] if "category" in metadata else "",
             "tags": " ".join(metadata["tags"]) if "tags" in metadata else "",
             "description": metadata["descriptionString"] if metadata["descriptionString"] else "",
-            "pagination": pagination
+            "pagination": pagination,
+            **config["comment"]
         })
 
         component = {
             "head": generateHead(
                 metadata,
-                js,
-                styles,
+                JS["Post"],
+                Styles["Post"],
                 haveSEO=True
             ),
             "navbar": generateNavbar(
@@ -740,7 +846,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
                         "previousSubtitle": data["metadatas"][i-1]["subtitleString"],
                         "previousOrder": data["metadatas"][i-1]["order"],
                         "divider": "｜",
-                        "previousPremalink": f"/{data["metadatas"][i-1]["premalink"]}"
+                        "previousPremalink": urljoin(data["metadatas"][i-1]["premalink"])
                     })
                 _next = "<div id=\"pagination-next\"></div>"
                 if i < len(data["metadatas"]) - 1:
@@ -748,7 +854,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
                         "nextSubtitle": data["metadatas"][i+1]["subtitleString"],
                         "nextOrder": data["metadatas"][i+1]["order"],
                         "divider": "｜",
-                        "nextPremalink": f"/{data["metadatas"][i+1]["premalink"]}"
+                        "nextPremalink": urljoin(data["metadatas"][i+1]["premalink"])
                     })
                 pagination = components["pagination"]["template"].substitute({
                     "previous": previous,
@@ -762,35 +868,6 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
     
 
 def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,languageList: list):
-    js = [
-        javascripts["display-setting"],
-        javascripts["scheme-switch"],
-        javascripts["language-switch"],
-        javascripts["archive"],
-        javascripts["selector-switch"],
-    ]
-
-    styles = [
-        containerStyles["archive"],
-        componentStyles["postcard"]["css"],
-        componentStyles["single"]["css"],
-        componentStyles["sidebar"]["css"],
-        componentStyles["navbar"]["css"],
-        componentStyles["navbar"]["subcss"]["display-setting"],
-        componentStyles["navbar"]["subcss"]["scheme-switch"],
-        componentStyles["navbar"]["subcss"]["language-switch"],
-        componentStyles["navbar"]["subcss"]["selector-switch"],
-        componentStyles["navbar"]["subcss"]["links"],
-        componentStyles["navbar"]["subcss"]["logo"],
-        componentStyles["navbar"]["subcss"]["mobile-menu"],
-        componentStyles["series"]["css"],
-        componentStyles["series"]["subcss"]["latest-link"],
-        componentStyles["series"]["subcss"]["latest-date"],
-        componentStyles["series"]["subcss"]["series-link"],
-
-    ]
-    styles.extend(defaultStyles)
-
     archiveItems = []
 
     for data in sortMetadata(metadatas):
@@ -807,7 +884,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                         "category": one["category"],
                         "tags": " ".join(one["tags"]),
                         "authors": " ".join(one["authors"]),
-                        "premalink": f"/{one["premalink"]}",
+                        "premalink": urljoin(one["premalink"]),
                         "order": one["order"],
                         "latest": "latest" if data["latest"]["date"] == one["date"] else ""
                     }))
@@ -826,7 +903,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                         "category": one["category"],
                         "tags": " ".join(one["tags"]),
                         "authors": " ".join(one["authors"]),
-                        "premalink": f"/{one["premalink"]}",
+                        "premalink": urljoin(one["premalink"]),
                         "order": one["order"]
                     }))
 
@@ -847,7 +924,7 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
                 "category": data["latest"]["category"],
                 "tags": " ".join(data["latest"]["tags"]),
                 "authors": " ".join(data["latest"]["authors"]),
-                "premalink": f"/{data["latest"]["premalink"]}"
+                "premalink": urljoin(data["latest"]["premalink"])
             }))
 
     archive = archiveContainer.substitute({
@@ -861,14 +938,14 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
         "descriptionString": language["config"][lang]["siteDescription"],
         "category": None,
         "tags": None,
-        "image": f"{config["info"]["url"]}/assets/image/avatar.png"
+        "image": f"{config['info']['url']}{urljoin('/assets/image/avatar.png')}"
     }
 
     component = {
         "head": generateHead(
             metadata,
-            js,
-            styles,
+            JS["Archive"],
+            Styles["Archive"],
             haveSEO=True
         ),
         "navbar": generateNavbar(
@@ -890,26 +967,6 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
     )
 
 def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: dict,languageList: list):
-    js = [
-        javascripts["language-switch"],
-        javascripts["display-setting"],
-        javascripts["scheme-switch"],
-    ]
-
-    styles = [
-        containerStyles["about"],
-        componentStyles["sidebar"]["css"],
-        componentStyles["article"]["css"],
-        componentStyles["navbar"]["css"],
-        componentStyles["navbar"]["subcss"]["display-setting"],
-        componentStyles["navbar"]["subcss"]["language-switch"],
-        componentStyles["navbar"]["subcss"]["scheme-switch"],
-        componentStyles["navbar"]["subcss"]["links"],
-        componentStyles["navbar"]["subcss"]["logo"],
-        componentStyles["navbar"]["subcss"]["mobile-menu"],
-    ]
-    styles.extend(defaultStyles)
-
     about = aboutContainer.substitute({
         "about": aboutContent
     })
@@ -917,8 +974,8 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
     component = {
         "head": generateHead(
             metadata,
-            js,
-            styles,
+            JS["About"],
+            Styles["About"],
             haveSEO=True
         ),
         "navbar": generateNavbar(
@@ -1030,7 +1087,6 @@ def build():
     print(f"\n✅ Build complete! Output directory: {OUTPUT_DIR}")
     print(f"\nTo preview the site, run a local server:")
     print(f"  python -m http.server 8000 --directory {OUTPUT_DIR}")
-
 
 if __name__ == "__main__":
     build()

@@ -11,7 +11,8 @@ function languageSwitch(type){
 	window.location.href = window.location.protocol + "//" + window.location.host + "/" + type + window.location.pathname.slice(3);
 }
 
-function languageNext() {
+const switchButton = document.getElementById("language-switch");
+switchButton.addEventListener("click", () => {
 	const next = document.getElementById("language-switch-menu").getElementsByClassName("current")[0].nextElementSibling;
 
 	if (next != null) {
@@ -20,4 +21,11 @@ function languageNext() {
 	else {
 		languageSwitch(document.getElementById("language-switch-menu").children[0].classList[0])
 	}
+})
+
+const buttons = document.getElementById("language-switch-menu").getElementsByTagName("button");
+for (var i = 0; i < buttons.length; i++) {
+	buttons[i].addEventListener("click", (e) => {
+		languageSwitch(e.target.classList[0])
+	})
 }

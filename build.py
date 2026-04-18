@@ -42,7 +42,12 @@ def urljoin(root) -> str:
             if not "subroot" in config["info"] or config["info"]["subroot"] == "":
                 return temp
             else:
-                subroot = config["info"]["subroot"].replace("/","")
+                subroot = config["info"]["subroot"]
+                if subroot[0] == "/":
+                    subroot = subroot[1:]
+                if subroot[-1] == "/":
+                    subroot = subroot[:-1]
+
                 if temp[0] != "/":
                     return f"/{subroot}/{temp}"
                 else:
@@ -546,6 +551,7 @@ def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bo
                     else:
                         languageName.append(f"<button class=\"{lang}\">{language["config"][lang]["languageName"]}</button>")
                         languageShortName.append(f"<div class=\"{lang}\">{language["config"][lang]["languageShortName"]}</div>")
+
                 navbar[key] = value.substitute({
                     "languageShortName": "\n".join(languageShortName),
                     "languageName": "\n".join(languageName),
@@ -738,6 +744,51 @@ def generateFeed(lang: str,metadatas: list) -> str:
     output_file = OUTPUT_DIR / lang / "feed.atom"
     output_file.parent.mkdir(exist_ok=True, parents=True)
     output_file.write_text("\n".join(feed), encoding="UTF-8")
+
+def generateSiteMap(lang: str, metadatas: list):
+    """Generate sitemap.xml for the given language."""
+    # Static pages
+    static_pages = [
+        {"loc": urljoin(f"/{lang}/"), "priority": "1.0", "changefreq": "daily"},
+        {"loc": urljoin(f"/{lang}/archive/"), "priority": "0.8", "changefreq": "monthly"},
+        {"loc": urljoin(f"/{lang}/about/"), "priority": "0.8", "changefreq": "monthly"},
+    ]
+    
+    # Convert static pages to XML entries
+    entries = []
+    for page in static_pages:
+        entries.append("<url>")
+        entries.append(f"  <loc>{config['info']['url']}{page['loc']}</loc>")
+        # Use current date as lastmod for static pages
+        entries.append(f'  <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>')
+        entries.append(f'  <changefreq>{page["changefreq"]}</changefreq>')
+        entries.append(f'  <priority>{page["priority"]}</priority>')
+        entries.append("</url>")
+    
+    # Add blog posts
+    for metadata in metadatas:
+        entries.append("<url>")
+        entries.append(f"  <loc>{config['info']['url']}{urljoin(metadata['premalink'])}</loc>")
+        lastmod = metadata.get("lastModDate")
+        if lastmod is None:
+            lastmod = metadata.get("date")
+        if lastmod:
+            entries.append(f'  <lastmod>{lastmod.strftime("%Y-%m-%d")}</lastmod>')
+        entries.append("  <changefreq>monthly</changefreq>")
+        entries.append("  <priority>0.8</priority>")
+        entries.append("</url>")
+    
+    # Build full sitemap XML
+    sitemap = []
+    sitemap.append('<?xml version="1.0" encoding="UTF-8"?>')
+    sitemap.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    sitemap.extend(entries)
+    sitemap.append('</urlset>')
+    
+    # Write to file
+    output_file = OUTPUT_DIR / lang / "sitemap.xml"
+    output_file.parent.mkdir(exist_ok=True, parents=True)
+    output_file.write_text("\n".join(sitemap), encoding="UTF-8")
 
 def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)
@@ -1059,6 +1110,11 @@ def build():
     # Copy
     copytree(ASSETS_DIR, OUTPUT_DIR / "assets")
 
+    if len(sys.argv) >= 2 and sys.argv[1] == "deploy":
+        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = {config["info"]["subroot"]}",encoding="UTF-8")
+    else:
+        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"\"",encoding="UTF-8")
+
     # Generate Index
     generateTemplate(
         template=templates["index"],
@@ -1099,6 +1155,10 @@ def build():
             allcategories=allcategories[lang]
         )
         generateFeed(
+            lang,
+            metadatas[lang]
+        )
+        generateSiteMap(
             lang,
             metadatas[lang]
         )

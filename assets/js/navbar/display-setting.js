@@ -19,7 +19,7 @@ switchButton.addEventListener("click", () => {
 });
 
 const input = document.getElementById("hue-slider");
-input.addEventListener("volumechange", (e) => {
+input.addEventListener("input", (e) => {
 	const hue = e.target.value;
 	const show = document.getElementById("display-setting-hue");
 	localStorage.setItem("Hue", hue);

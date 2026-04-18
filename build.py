@@ -84,7 +84,7 @@ for file in (ASSETS_DIR / "style" / "container").iterdir():
 
 defaultStyles = []
 for file in (ASSETS_DIR / "style").glob("*.css"):
-    defaultStyles.append(generateStyle(urljoin(file.relative_to(BASE_DIR))))
+    defaultStyles.append(generateStyle(file.relative_to(BASE_DIR)))
 
 javascripts = {}
 for file in (ASSETS_DIR / "js").rglob("*.js"):
@@ -236,6 +236,21 @@ for file in COMPONENTS_DIR.iterdir():
     else:
         components[file.stem]["template"] = Template(file.read_text(encoding="UTF-8"))
 
+def typstReplace(raw: str):
+    replace = re.sub(
+        "(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)",
+        "\\1",
+        raw
+    )
+
+    replace = re.sub(
+        "<img src=\"([\\S ]*)\">",
+        lambda match: f"<img src=\"{urljoin(match.group(1))}\">",
+        replace
+    )
+
+    return replace
+
 def compileTypstStr(content: str) -> str:
     command = [
         "typst",
@@ -276,9 +291,7 @@ def compileTypstStr(content: str) -> str:
     bodyRIndex = html.rfind("</body>") - 1
     htmlContent = html[bodyIndex:bodyRIndex]
 
-    replace = re.sub("(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)","\\1",htmlContent).replace("<p>","").replace("</p>","")
-
-    return replace
+    return typstReplace(htmlContent.replace("<p>","").replace("</p>",""))
 
 def getMetadata(file: Path) -> dict:
     print(f"Parsing {file.relative_to(BASE_DIR)}")
@@ -458,9 +471,7 @@ def compileTypst(file: Path) -> str:
     bodyRIndex = html.rfind("</body>") - 1
     htmlContent = html[bodyIndex:bodyRIndex]
 
-    replace = re.sub("(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)","\\1",htmlContent)
-
-    return replace
+    return typstReplace(htmlContent)
 
 def generateSEO(metadata: dict) -> str:
     lang = metadata.get("lang")[0:2]
@@ -544,7 +555,10 @@ def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bo
             case _:
                 navbar[key] = value.substitute({
                     **language["config"][metadata["lang"][0:2]],
-                    "lang": metadata["lang"][0:2]
+                    "lang": metadata["lang"][0:2],
+                    "homeLink": urljoin(f"{metadata["lang"][0:2]}/"),
+                    "archiveLink": urljoin(f"{metadata["lang"][0:2]}/archive/"),
+                    "aboutLink": urljoin(f"{metadata["lang"][0:2]}/about/"),
                 })
     navbarActions = []
 
@@ -562,7 +576,10 @@ def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bo
     return components["navbar"]["template"].substitute({
         "actions": "\n".join(navbarActions),
         "lang": metadata["lang"][0:2],
-        **language["config"][metadata["lang"][0:2]]
+        **language["config"][metadata["lang"][0:2]],
+        "homeLink": urljoin(f"{metadata["lang"][0:2]}/"),
+        "archiveLink": urljoin(f"{metadata["lang"][0:2]}/archive/"),
+        "aboutLink": urljoin(f"{metadata["lang"][0:2]}/about/"),
     })
 
 def generateSideBar(metadata: dict,alltags: list,allcategories: dict) -> str:
@@ -579,9 +596,12 @@ def generateSideBar(metadata: dict,alltags: list,allcategories: dict) -> str:
         sidebar[key] = value.substitute({
             **language["config"][metadata["lang"][0:2]],
             "lang": metadata["lang"][0:2],
-            **config["info"],
+            "avatar": urljoin(config["info"]["avatar"]),
             "allcategories": "\n".join(htmlCategories),
             "alltags": "\n".join(htmlTags),
+            "feedFile": urljoin(f"{metadata['lang'][0:2]}/feed.atom"),
+            "aboutLink": urljoin(f"{metadata['lang'][0:2]}/about/"),
+            **config["social"]
         })
 
     sidebarWidget = [sidebar["profile"],sidebar["categories"],sidebar["tags"]]
@@ -1045,7 +1065,6 @@ def build():
         component={
             "supportLanguage": json.dumps(list(languagelist),ensure_ascii=False),
             "defaultLanguage": config["info"]["defaultLanguage"],
-            "icon": config["info"]["icon"]
         },
         lang="",
         container="",

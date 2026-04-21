@@ -79,7 +79,7 @@ For modularization of data and code, splitting them facilitates writing.
 
 In the distant north, there is a small town surrounded by mountains. Every winter, heavy snow blankets the entire valley, turning rooftops and streets a pristine white. In the early morning, smoke rises gently from low chimneys, intertwining with the mist, as if draping a thin veil over this quiet town. The elderly are accustomed to brewing a pot of hot tea by the fireplace, listening to the sound of snowflakes falling softly outside the window, slowly passing the long afternoons. Occasionally, children build snowmen and have snowball fights in the alleyways, their crisp laughter breaking the winter stillness. Here, there is no hustle and bustle of big cities; time seems to flow exceptionally slowly, every moment worth savoring.
 
-Note: `AI` generated.
+Note: @AI:s generated.
 
 === Image
 

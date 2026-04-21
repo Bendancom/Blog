@@ -6,12 +6,13 @@
   show: abbrevia.show-rule
 
   let abbr-lang = lang.abbr.at(text.lang)
-  let unpack(item) = {
-    (item, abbr-lang.at(item))
+  let abbrs = ()
+  for (key,value) in abbr-lang.pairs() {
+    abbrs.push((key, abbr-lang.at(key)))
   }
 
   abbrevia.make(
-    unpack("PDE")
+    ..abbrs
   )
 
   content

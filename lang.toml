@@ -33,6 +33,7 @@ symbolList = "符号表"
 
 [abbr.zh]
 PDE = "偏微分方程"
+AI = "人工智能"
 
 [config.en]
 siteTitle = "Bendancom's blog"
@@ -69,4 +70,4 @@ symbolList = "List of Symbol"
 
 [abbr.en]
 PDE = "Partial Differential Equation"
-
+AI = "Artificial Intelligence"

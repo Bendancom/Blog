@@ -1,0 +1,253 @@
+#import "/typ/post.typ": post
+
+#show: post.with(
+  title: [如何建立一个Java版Minecraft服务器],
+  subtitle: none,
+  authors: "岑白",
+  description: [自建Java版Minecraft服务器，涉及安装、备份、mod管理、自启动等],
+  date: datetime(year: 2023,month: 6,day: 18),
+  lastModDate: datetime(year: 2026,month: 4,day: 10),
+  category: "游戏",
+  tags: ("Minecraft","Java","服务器"),
+  order: none,
+  image: none,
+  lang: "zh",
+)
+
+= 前言
+
+在长久以来的单人Minecraft后，即使其游玩内容丰富，但仍想找到志同道合的朋友一起游玩去创造美好回忆。而中国版Minecraft可以说是限制颇大了，因而国际版Java服务器可以说是联机的首选了。
+
+= 前期准备
+
+== 设备准备
+
+选其中一个即可：
+
+- 一台联网电脑，性能满足游戏需求，系统优先级为 `Linux > Windows = Mac`。
+- 云服务器
+
+== 环境准备
+
+- `OpenJDK`
+
+== 知识准备
+
+- 基本电脑知识
+- 基础 `Linux` 知识(`Linux`系统)
+- 一定英语水平，便于解决疑难问题
+
+= Minecraft文件根目录
+
+推荐创建在带快照的文件系统内。
+
+= 服务器安装
+
+== 原版
+
+#link("https://launchermeta.mojang.com/mc/game/version_manifest.json")[版本]
+在其中挑选所需的服务器版本，如有模组需注意二者`Minecraft`版本的匹配。
+
+```json
+{
+    "id": "1.20.1",
+    "type": "release",
+    "url": "https://piston-meta.mojang.com/v1/packages/30e78c499d4df02aab34a811e290c1805f925105/1.20.1.json",
+    "time": "2024-04-03T06:24:18+00:00",
+    "releaseTime": "2023-06-12T13:25:51+00:00"
+},
+```
+
+从中获取版本号对应的`URL`并打开此`json`文件，在其中找到`downloads`元素(第165行)
+
+```json
+"downloads": {
+        "client": {
+            "sha1": "4e969a3079409732a39aa722ea61d03876c41367",
+            "size": 25230298,
+            "url": "https://piston-data.mojang.com/v1/objects/4e969a3079409732a39aa722ea61d03876c41367/client.jar"
+        },
+        "client_mappings": {
+            "sha1": "85283b9708072cada19de2a29955957939af2127",
+            "size": 9308979,
+            "url": "https://piston-data.mojang.com/v1/objects/85283b9708072cada19de2a29955957939af2127/client.txt"
+        },
+        "server": {
+            "sha1": "00cab0438130dc3e6ae91f53387bb96ae7986d31",
+            "size": 50546942,
+            "url": "https://piston-data.mojang.com/v1/objects/00cab0438130dc3e6ae91f53387bb96ae7986d31/server.jar"
+        },
+        "server_mappings": {
+            "sha1": "a5e08ee736fb987f2920b98d25961245aac087bc",
+            "size": 7172652,
+            "url": "https://piston-data.mojang.com/v1/objects/a5e08ee736fb987f2920b98d25961245aac087bc/server.txt"
+        }
+    },
+```
+
+下载第三个元素`server`中的`URL`文件`server.jar`至根目录中。
+
+在服务器根目录中执行如下命令：
+该命令为初始化服务器组件与启动服务器。
+
+```sh
+java -Xmx4G -jar server.jar nogui
+```
+
+参数含义：
+
+- `-Xmx4G` 最大内存4G
+- `-jar server.jar` 指定`server.jar`为执行目标
+- `nogui` 无图形界面执行
+
+执行完后文件目录
+
+```tree
+├── eula.txt
+├── libraries
+├── logs
+├── server.jar
+├── server.properties
+└── versions
+```
+
+将`eula.txt`文件中的`eula`变量由`false`改为`true`。
+
+服务器配置文件为`server.properties`，可参照 #link("https://minecraft.fandom.com/zh/wiki/Server.properties")[Minecraft中文Wiki——配置服务器设置] 配置。
+
+== `Forge`/`NeoForge`
+
+`NeoForge` 为 `Forge` 分支，二者在安装上无不同之处
+
+#link("https://files.minecraftforge.net/net/minecraftforge/forge")[`Forge`]
+选择自己想要的版本，点击`Install`后跳转至下载页面
+等待5秒后点击右上角的Skip即可下载
+
+注：该官网可能需要`VPN`才能流畅连接
+
+#link("https://neoforged.net/")[`NeoForge`]
+选择版本，然后点击`Install`下载
+
+将下载的文件移至根目录中，而后执行如下命令：
+
+```sh
+java -jar forge-1.20.1-48.0.39.jar --installServer
+```
+
+参数含义：
+
+- `-jar forge-1.20.1-48.0.39.jar` 指定执行文件，根据自身下载的文件更改该参数
+- `--installServer` `Forge`/`NeoForge` 安装服务端
+
+执行完后根目录如下：
+
+```tree
+├── libraries
+├── run.bat
+├── run.sh
+└── user_jvm_args.txt
+```
+
+执行对应系统的启动脚本：
+
+- `Windows`: `run.bat`
+- `Linux`与`Mac OS`: `run.sh`
+
+执行完后根目录如下：
+
+```tree
+├── config
+├── defaultconfigs
+├── eula.txt
+├── libraries
+├── logs
+├── mods
+├── run.bat
+├── run.sh
+└── user_jvm_args.txt
+```
+
+将`eula.txt`文件中的`eula`变量由`false`改为`true`。
+模组存放于`mods`文件夹中。
+`Java`启动参数在`user_jvm_args.txt`中设置。
+服务器配置文件为`server.properties`，可参照 #link("https://minecraft.fandom.com/zh/wiki/Server.properties")[Minecraft中文Wiki——配置服务器设置] 配置。
+
+== `Fabric`/`Quilt`
+
+`Quilt`脱胎于`Fabric`,可用几乎所有的`Fabric`mod，二者在安装方式上也并无差别
+
+#link("https://fabricmc.net/use/server")[`Fabric`]
+下载所需版本至开服根目录中。
+#link("https://quiltmc.org/en/install/server/")[`Quilt`]
+下载所需版本至开服根目录中
+
+执行如下命令：
+该命令为初始化服务器组件与启动服务器。
+
+```sh
+java -Xmx4G -jar fabric-server-mc.1.19.2-loader.0.14.21-launcher.0.11.2.jar nogui
+```
+
+参数含义：
+
+- `-jar fabric-server-mc.1.19.2-loader.0.14.21-launcher.0.11.2.jar` 执行目标为`Fabric`服务器文件
+- `-Xmx4G` 最大内存为`4G`
+- `nogui` 无图形界面
+
+执行完毕后根目录如下：
+
+```tree
+├── eula.txt
+├── fabric-server-mc.1.19.2-loader.0.14.21-launcher.0.11.2.jar
+├── libraries
+├── logs
+├── mods
+├── server.jar
+├── server.properties
+└── versions
+```
+
+将`eula.txt`文件中的`eula`变量由`false`改为`true`。
+模组存放于`mods`文件夹中。
+服务器配置文件为`server.properties`，可参照 #link("https://minecraft.fandom.com/zh/wiki/Server.properties")[Minecraft中文Wiki——配置服务器设置] 配置。
+
+== 整合包
+
+按其官方的说名进行安装、配置
+
+= 防火墙
+
+`Minecraft`默认端口为25565。
+可在`server.properties`中的`server-port`变量配置
+
+服务器需要公网`IP`供他人访问
+
+== `IPv4`
+
+在防火墙中开启对应端口的`IPv4`出入。
+
+`IPv4`的公网`IP`难以获得，若没有只能内网穿透
+目前`IPv4`内网穿透有两种方式
+
+- `Frp`
+- `P2P`
+
+`Frp`可能需要付费(有些有限流限额的免费)，但仅需服务端进行配置，客户端无需繁琐操作
+`P2P`完全免费，但服务端与客户端都要进行专门的配置
+
+== IPv6
+
+在防火墙中开启对应端口的`IPv6`出入
+
+`IPv6`因其庞大的数量，目前所有`IPv6`设备都有自己的属于`IPv6`的公网`IP`。
+`IPv6`在国内虽说普及率达到90%以上，但由于有许多老设备仍在运行，可能受到路由器、光猫、运营商等的拦截。
+
+= 快照
+
+== 通用
+
+文件系统级别的快照备份，具体参照各文件系统的快照功能
+
+== mod
+
+#link("https://www.mcmod.cn/class/10769.html")[高级备份]这一mod可供选择。

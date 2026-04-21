@@ -34,6 +34,7 @@
 	justify-content: center;
 	flex-flow: column;
 	padding: var(--space-sm);
+	gap: var(--space-sm);
 }
 
 #language-switch-menu button {

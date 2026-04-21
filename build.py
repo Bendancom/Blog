@@ -524,7 +524,15 @@ def generateSEO(metadata: dict) -> str:
 
     return "\n".join(seo_tags)
 
-def generateHead(metadata: dict, js: list, styles: list,haveSEO:bool) -> str:
+def generateHead(metadata: dict, js: list, styles: list, haveLicense, haveSEO:bool, prevLink: str, nextLink: str) -> str:
+    pagination = []
+    if prevLink is not None:
+        pagination.append(f"<link rel=\"prev\" href=\"{urljoin(prevLink)}\">")
+    if nextLink is not None:
+        pagination.append(f"<link rel=\"prev\" href=\"{urljoin(nextLink)}\">")
+    _license = ""
+    if haveLicense:
+        _license = f"<link rel=\"license\" href=\"{config["copyright"]["url"]}\">"
     return components["head"]["template"].substitute({
         "js": "\n".join(js),
         "SEO": generateSEO(metadata) if haveSEO else "",
@@ -534,7 +542,11 @@ def generateHead(metadata: dict, js: list, styles: list,haveSEO:bool) -> str:
         "lang": metadata["lang"][0:2],
         "siteTitle": language["config"][metadata["lang"][0:2]]["siteTitle"],
         "feed": language["config"][metadata["lang"][0:2]]["feed"],
-        "feedFile": urljoin(f"{metadata['lang'][0:2]}/feed.atom")
+        "feedFile": urljoin(f"{metadata['lang'][0:2]}/feed.atom"),
+        "aboutLink": urljoin(f"/{metadata["lang"][0:2]}/about/"),
+        "sitemapLink": urljoin(f"/{metadata["lang"][0:2]}/sitemap.xml"),
+        "pagination": "\n".join(pagination),
+        "license": _license
     })
 
 def generateNavbar(metadata: dict,selector: bool,finder: bool,languageSwitch: bool,languageList: list) -> dict:
@@ -746,7 +758,6 @@ def generateFeed(lang: str,metadatas: list) -> str:
     output_file.write_text("\n".join(feed), encoding="UTF-8")
 
 def generateSiteMap(lang: str, metadatas: list):
-    """Generate sitemap.xml for the given language."""
     # Static pages
     static_pages = [
         {"loc": urljoin(f"/{lang}/"), "priority": "1.0", "changefreq": "daily"},
@@ -790,6 +801,8 @@ def generateSiteMap(lang: str, metadatas: list):
     output_file.parent.mkdir(exist_ok=True, parents=True)
     output_file.write_text("\n".join(sitemap), encoding="UTF-8")
 
+    # SiteMap Index
+
 def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)
     outputFile.write_text(template.substitute({
@@ -832,6 +845,9 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
             metadata,
             JS["Home"],
             Styles["Home"],
+            haveLicense=False,
+            prevLink=None,
+            nextLink=None,
             haveSEO=True
         ),
         "navbar": generateNavbar(
@@ -853,7 +869,7 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
     )
 
 def generatePosts(metadatas: list,alltags: list,allcategories: dict):
-    def Post(metadata,pagination):
+    def Post(metadata, prevPost, nextPost):
         outputFile = OUTPUT_DIR / metadata["premalink"] / "index.html"
 
         lang = ""
@@ -862,6 +878,27 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
                 lang = "zh-CN"
             case "en":
                 lang = "en"
+
+        previous = "<div id=\"pagination-previous\"></div>"
+        if prevPost is not None:
+            previous = components["pagination"]["subcomponents"]["previous"].substitute({
+                "previousSubtitle": prevPost["subtitleString"],
+                "previousOrder": prevPost["order"],
+                "divider": "｜",
+                "previousPremalink": urljoin(prevPost["premalink"])
+            })
+        _next = "<div id=\"pagination-next\"></div>"
+        if nextPost is not None:
+            _next = components["pagination"]["subcomponents"]["next"].substitute({
+                "nextSubtitle": nextPost["subtitleString"],
+                "nextOrder": nextPost["order"],
+                "divider": "｜",
+                "nextPremalink": urljoin(nextPost["premalink"])
+            })
+        pagination = components["pagination"]["template"].substitute({
+            "previous": previous,
+            "next": _next
+        })
 
         post = postContainer.substitute({
             "lang": lang,
@@ -884,6 +921,9 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
                 metadata,
                 JS["Post"],
                 Styles["Post"],
+                haveLicense=True,
+                prevLink=urljoin(prevPost["premalink"]) if prevPost is not None else None,
+                nextLink=urljoin(nextPost["premalink"]) if nextPost is not None else None,
                 haveSEO=True
             ),
             "navbar": generateNavbar(
@@ -910,31 +950,31 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
 
     for data in sortMetadata(metadatas):
         if "metadatas" in data:
-            for i,metadata in enumerate(data["metadatas"]):
-                previous = "<div id=\"pagination-previous\"></div>"
-                if i != 0:
-                    previous = components["pagination"]["subcomponents"]["previous"].substitute({
-                        "previousSubtitle": data["metadatas"][i-1]["subtitleString"],
-                        "previousOrder": data["metadatas"][i-1]["order"],
-                        "divider": "｜",
-                        "previousPremalink": urljoin(data["metadatas"][i-1]["premalink"])
-                    })
-                _next = "<div id=\"pagination-next\"></div>"
-                if i < len(data["metadatas"]) - 1:
-                    _next = components["pagination"]["subcomponents"]["next"].substitute({
-                        "nextSubtitle": data["metadatas"][i+1]["subtitleString"],
-                        "nextOrder": data["metadatas"][i+1]["order"],
-                        "divider": "｜",
-                        "nextPremalink": urljoin(data["metadatas"][i+1]["premalink"])
-                    })
-                pagination = components["pagination"]["template"].substitute({
-                    "previous": previous,
-                    "next": _next
-                })
-
-                Post(metadata,pagination)
+            if len(data["metadatas"]) > 1:
+                for i,metadata in enumerate(data["metadatas"]):
+                    if i != 0 and i < len(data["metadatas"]) - 1:
+                        Post(
+                            metadata,
+                            prevPost=data["metadatas"][i-1],
+                            nextPost=data["metadatas"][i+1]
+                        )
+                    else:
+                        if i == 0:
+                            Post(
+                                metadata,
+                                prevPost=None,
+                                nextPost=data["metadatas"][i+1]
+                            )
+                        else:
+                            Post(
+                                metadata,
+                                prevPost=data["metadatas"][i-1],
+                                nextPost=None
+                            )
+            else:
+                Post(data["metadatas"][0],prevPost=None,nextPost=None)
         else:
-            Post(data["latest"],"")
+            Post(data["latest"],prevPost=None,nextPost=None)
 
     
 
@@ -1017,6 +1057,9 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
             metadata,
             JS["Archive"],
             Styles["Archive"],
+            haveLicense=False,
+            prevLink=None,
+            nextLink=None,
             haveSEO=True
         ),
         "navbar": generateNavbar(
@@ -1047,6 +1090,9 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
             metadata,
             JS["About"],
             Styles["About"],
+            haveLicense=True,
+            prevLink=None,
+            nextLink=None,
             haveSEO=True
         ),
         "navbar": generateNavbar(

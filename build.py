@@ -760,33 +760,29 @@ def generateFeed(lang: str,metadatas: list) -> str:
 def generateSiteMap(lang: str, metadatas: list):
     # Static pages
     static_pages = [
-        {"loc": urljoin(f"/{lang}/"), "priority": "1.0", "changefreq": "daily"},
-        {"loc": urljoin(f"/{lang}/archive/"), "priority": "0.8", "changefreq": "monthly"},
-        {"loc": urljoin(f"/{lang}/about/"), "priority": "0.8", "changefreq": "monthly"},
+        parse.urljoin(config["info"]["url"], urljoin(f"/{lang}/")),
+        parse.urljoin(config["info"]["url"], urljoin(f"/{lang}/archive/")),
+        parse.urljoin(config["info"]["url"], urljoin(f"/{lang}/about/")),
     ]
     
     # Convert static pages to XML entries
     entries = []
     for page in static_pages:
         entries.append("<url>")
-        entries.append(f"  <loc>{config['info']['url']}{page['loc']}</loc>")
+        entries.append(f"  <loc>{page}</loc>")
         # Use current date as lastmod for static pages
         entries.append(f'  <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>')
-        entries.append(f'  <changefreq>{page["changefreq"]}</changefreq>')
-        entries.append(f'  <priority>{page["priority"]}</priority>')
         entries.append("</url>")
     
     # Add blog posts
     for metadata in metadatas:
         entries.append("<url>")
-        entries.append(f"  <loc>{config['info']['url']}{urljoin(metadata['premalink'])}</loc>")
+        entries.append(f"  <loc>{parse.urljoin(config['info']['url'], urljoin(metadata['premalink']))}/</loc>")
         lastmod = metadata.get("lastModDate")
         if lastmod is None:
             lastmod = metadata.get("date")
         if lastmod:
             entries.append(f'  <lastmod>{lastmod.strftime("%Y-%m-%d")}</lastmod>')
-        entries.append("  <changefreq>monthly</changefreq>")
-        entries.append("  <priority>0.8</priority>")
         entries.append("</url>")
     
     # Build full sitemap XML
@@ -800,6 +796,23 @@ def generateSiteMap(lang: str, metadatas: list):
     output_file = OUTPUT_DIR / lang / "sitemap.xml"
     output_file.parent.mkdir(exist_ok=True, parents=True)
     output_file.write_text("\n".join(sitemap), encoding="UTF-8")
+
+def generateSiteMapIndex(languageList: list):
+    index = []
+    index.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+    index.append("<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+    for lang in languageList:
+        index.append("<sitemap>")
+        index.append(f"<loc>{parse.urljoin(config["info"]["url"],urljoin(f"/{lang}/sitemap.xml"))}</loc>")
+        index.append("</sitemap>")
+    index.append("</sitemapindex>")
+
+    # Write to file
+    output_file = OUTPUT_DIR / "sitemap_index.xml"
+    output_file.parent.mkdir(exist_ok=True, parents=True)
+    output_file.write_text("\n".join(index), encoding="UTF-8")
+
+
 
 def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)
@@ -1171,6 +1184,9 @@ def build():
         container="",
         outputFile= OUTPUT_DIR / "index.html"
     )
+
+    # Generate SiteMap Index
+    generateSiteMapIndex(languagelist)
 
     for lang in metadatas.keys():
         generateHome(

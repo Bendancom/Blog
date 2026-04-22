@@ -801,8 +801,6 @@ def generateSiteMap(lang: str, metadatas: list):
     output_file.parent.mkdir(exist_ok=True, parents=True)
     output_file.write_text("\n".join(sitemap), encoding="UTF-8")
 
-    # SiteMap Index
-
 def generateTemplate(template: Template,component: dict,lang: str,container: str,outputFile: Path):
     outputFile.parent.mkdir(exist_ok=True,parents=True)
     outputFile.write_text(template.substitute({
@@ -1167,7 +1165,7 @@ def build():
         component={
             "supportLanguage": json.dumps(list(languagelist),ensure_ascii=False),
             "defaultLanguage": config["info"]["defaultLanguage"],
-            "sitemap": "\n".join([ f"<meta name=\"{seo["name"]}\" content=\"{seo["key"]}\">" for seo in config["SEO"].values() ])
+            "sitemap": "\n".join([ f"<meta name=\"{seo["name"]}\" content=\"{seo["key"]}\"/>" for seo in config["SEO"].values() ])
         },
         lang="",
         container="",

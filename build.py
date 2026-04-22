@@ -1167,6 +1167,7 @@ def build():
         component={
             "supportLanguage": json.dumps(list(languagelist),ensure_ascii=False),
             "defaultLanguage": config["info"]["defaultLanguage"],
+            "sitemap": "\n".join([ f"<meta name=\"{seo["name"]}\" content=\"{seo["key"]}\">" for seo in config["SEO"].values() ])
         },
         lang="",
         container="",

@@ -5,6 +5,10 @@ icon = "/assets/image/favicon.ico"
 avatar = "/assets/image/avatar.png"
 defaultLanguage = "zh"
 
+[SEO]
+google = { name = "google-site-verification", key = "pwaT5WWNlN9GKBzYINHWt83Pst12qFw3kwEzVwpxyeQ" }
+bing = { name = "msvalidate.01", key = "4056CAD5A32658E06A7A7E90B6D8C3B6" }
+
 [social]
 email = "bendancom@qq.com"  # Author email
 bilibili = "https://space.bilibili.com/43229292"

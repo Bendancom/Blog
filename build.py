@@ -3,8 +3,9 @@ import os
 import re
 import subprocess
 import json
-import sys
+import argparse
 
+from shutil import copytree,rmtree
 from urllib import parse
 from datetime import datetime
 from string import Template
@@ -30,6 +31,11 @@ with open(BASE_DIR / "config.toml","rb") as f:
 with open(BASE_DIR / "lang.toml","rb") as f:
     language = load(f)
 
+ArgsParser = argparse.ArgumentParser(description="Help")
+ArgsParser.add_argument("command", type=str, help="how to make the Blog \n - deploy \n - build")
+ArgsParser.add_argument("--rebuild", type=bool, default=False, help="Rebuild the Blog")
+Args = ArgsParser.parse_args()
+
 def urljoin(root) -> str:
     temp = str(root)
 
@@ -37,8 +43,8 @@ def urljoin(root) -> str:
     if all([url.scheme, url.netloc]):
         return temp
 
-    if len(sys.argv) >= 2:
-        if sys.argv[1] == "deploy":
+    match Args.command :
+        case "deploy":
             if not "subroot" in config["info"] or config["info"]["subroot"] == "":
                 return temp
             else:
@@ -52,16 +58,11 @@ def urljoin(root) -> str:
                     return f"/{subroot}/{temp}"
                 else:
                     return f"/{subroot}{temp}"
-        else:
+        case "build":
             if temp[0] != "/":
                 return f"/{temp}"
             else:
                 return temp
-    else: 
-        if temp[0] != "/":
-            return f"/{temp}"
-        else:
-            return temp
 
 def generateStyle(path: str) -> str:
     return f"<link rel=\"stylesheet\" type=\"text/css\" href=\"{urljoin(path)}\">"
@@ -244,6 +245,11 @@ for file in COMPONENTS_DIR.iterdir():
 def typstReplace(raw: str):
     replace = re.sub(
         "(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)",
+        "\\1",
+        raw
+    )
+    replace = re.sub(
+        "(<div role=\"img\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)",
         "\\1",
         raw
     )
@@ -478,7 +484,7 @@ def compileTypst(file: Path) -> str:
 
     return typstReplace(htmlContent)
 
-def generateSEO(metadata: dict) -> str:
+def generateOpenType(metadata: dict) -> str:
     lang = metadata.get("lang")[0:2]
     title = metadata.get("titleString")
     description = metadata.get("descriptionString")
@@ -535,7 +541,7 @@ def generateHead(metadata: dict, js: list, styles: list, haveLicense, haveSEO:bo
         _license = f"<link rel=\"license\" href=\"{config["copyright"]["url"]}\">"
     return components["head"]["template"].substitute({
         "js": "\n".join(js),
-        "SEO": generateSEO(metadata) if haveSEO else "",
+        "SEO": generateOpenType(metadata) if haveSEO else "",
         "style": "\n".join(styles),
         "url": config["info"]["url"],
         "icon": urljoin(config["info"]["icon"]),
@@ -734,8 +740,9 @@ def generateFeed(lang: str,metadatas: list) -> str:
 
         if metadata["descriptionString"]:
             entry.append(f"<summary>{metadata["descriptionString"]}</summary>")
-    
-        entry.append(f"<content type=\"html\"><![CDATA[{metadata["content"]}]]></content>")
+        
+        if metadata["isBuild"]:
+            entry.append(f"<content type=\"html\"><![CDATA[{metadata["content"]}]]></content>")
         entry.append("</entry>")
         
         entries.append("\n".join(entry))
@@ -881,6 +888,16 @@ def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,lan
 
 def generatePosts(metadatas: list,alltags: list,allcategories: dict):
     def Post(metadata, prevPost, nextPost):
+        isBuild = False
+        if prevPost is not None and prevPost["isBuild"]:
+            isBuild = True
+        if nextPost is not None and nextPost["isBuild"]:
+            isBuild = True
+        if metadata["isBuild"]:
+            isBuild = True
+        if not isBuild:
+            return
+
         outputFile = OUTPUT_DIR / metadata["premalink"] / "index.html"
 
         lang = ""
@@ -913,7 +930,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
 
         post = postContainer.substitute({
             "lang": lang,
-            "content": metadata["content"],
+            "content": metadata["content"] if "content" in metadata else compileTypst(CONTENT_DIR / metadata["relativePath"]),
             "metadata": generateMetadata(metadata,TitleLink=False),
             "title": metadata["titleString"],
             "subtitle": metadata["subtitleString"] if metadata["subtitleString"] else "",
@@ -1091,9 +1108,9 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
         outputFile= OUTPUT_DIR / lang / "archive" / "index.html"
     )
 
-def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: dict,languageList: list):
+def generateAbout(lang: str,about: dict,alltags: list,allcategories: dict,languageList: list):
     about = aboutContainer.substitute({
-        "about": aboutContent
+        "about": about[lang]["content"]
     })
 
     component = {
@@ -1113,7 +1130,7 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
             languageList=languageList,
             languageSwitch=True
         ),
-        "sidebar": generateSideBar(metadata,alltags,allcategories)
+        "sidebar": generateSideBar(about[lang]["metadata"],alltags,allcategories)
     }
 
     generateTemplate(
@@ -1125,8 +1142,6 @@ def generateAbout(metadata: dict,aboutContent: str,alltags: list,allcategories: 
     )
 
 def build():
-    from shutil import copytree,rmtree
-
     # Get metadata
     metadatas = defaultdict(list)
     alltags = defaultdict(set)
@@ -1137,10 +1152,14 @@ def build():
         metadata = getMetadata(file)
         if metadata is None:
             continue
+
         lang = metadata["lang"][0:2]
         languagelist.add(lang)
 
         if file.relative_to(CONTENT_DIR).parts[0] == "about":
+            if (OUTPUT_DIR / lang / "about" / "index.html").exists():
+                if (OUTPUT_DIR / lang / "about" / "index.html").stat().st_mtime >= file.stat().st_mtime:
+                    continue
             print(f"Compiling {file.relative_to(BASE_DIR)}")
             about[lang]["content"] = compileTypst(file)
             about[lang]["metadata"] = metadata
@@ -1153,24 +1172,28 @@ def build():
                 allcategories[lang][metadata["category"]] += 1
             else:
                 allcategories[lang][metadata["category"]] = 1
-
-        print(f"Compiling {file.relative_to(BASE_DIR)}")
-        metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
+        
+        
+        if (OUTPUT_DIR / metadata["premalink"]).exists():
+            if (OUTPUT_DIR / metadata["premalink"]).stat().st_mtime >= file.stat().st_mtime:
+                metadata["isBuild"] = False
+            else:
+                print(f"Compiling {file.relative_to(BASE_DIR)}")
+                metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
+                metadata["isBuild"] = True
 
         metadatas[lang].append(metadata)
 
-    # Clear output
-    if OUTPUT_DIR.exists():
-        rmtree(OUTPUT_DIR)
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
     # Copy
+    if (OUTPUT_DIR / "assets").exists():
+        rmtree(OUTPUT_DIR / "assets")
     copytree(ASSETS_DIR, OUTPUT_DIR / "assets")
 
-    if len(sys.argv) >= 2 and sys.argv[1] == "deploy":
-        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"{config["info"]["subroot"]}\"",encoding="UTF-8")
-    else:
-        Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"\"",encoding="UTF-8")
+    match Args.command:
+        case "deploy":
+            Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"{config["info"]["subroot"]}\"",encoding="UTF-8")
+        case "build":
+            Path(OUTPUT_DIR / "assets" / "js" / "subroot.js").write_text(f"export const subroot = \"\"",encoding="UTF-8")
 
     # Generate Index
     generateTemplate(
@@ -1196,13 +1219,14 @@ def build():
             allcategories[lang],
             languageList=languagelist
         )
-        generateAbout(
-            about[lang]["metadata"],
-            about[lang]["content"],
-            alltags[lang],
-            allcategories[lang],
-            languageList=languagelist
-        )
+        if lang in about:
+            generateAbout(
+                lang,
+                about[lang],
+                alltags[lang],
+                allcategories[lang],
+                languageList=languagelist
+            )
         generateArchive(
             lang,
             metadatas[lang],
@@ -1229,4 +1253,8 @@ def build():
     print(f"  python -m http.server 8000 --directory {OUTPUT_DIR}")
 
 if __name__ == "__main__":
+    if Args.rebuild:
+        if OUTPUT_DIR.exists():
+            rmtree(OUTPUT_DIR)
+        OUTPUT_DIR.mkdir(exist_ok=True,parents=True)
     build()

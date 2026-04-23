@@ -1219,7 +1219,9 @@ def build():
             allcategories[lang],
             languageList=languagelist
         )
-        if lang in about:
+        if lang in dict(about):
+            pprint(lang)
+            pprint(about)
             generateAbout(
                 lang,
                 about[lang],

@@ -3,7 +3,7 @@
 #show: post.with(
   title: [如何建立一个Java版Minecraft服务器],
   subtitle: none,
-  authors: "岑白",
+  authors: "岑白Bd",
   description: [自建Java版Minecraft服务器，涉及安装、备份、mod管理、自启动等],
   date: datetime(year: 2023,month: 6,day: 18),
   lastModDate: datetime(year: 2026,month: 4,day: 10),

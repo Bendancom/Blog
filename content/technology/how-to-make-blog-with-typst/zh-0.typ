@@ -6,7 +6,7 @@
 #show: post.with(
   title: [如何使用`Typst`创建博客],
   subtitle: [前言],
-  authors: ("岑白"),
+  authors: ("岑白Bd"),
   description: [为什么要选择`Typst`作为博客写作的标记语言，为什么要写这一个系列],
   date: datetime(year: 2026,month: 4,day: 12),
   lastModDate: none,
@@ -147,11 +147,12 @@ $
 
 === 绘图
 
-#canvas({
-  import cetz.draw: *
-  circle((0,0))
-  line((0,0),(2,1))
-})
+#canvas(cetz.canvas({
+    import cetz.draw: *
+    circle((0,0))
+    line((0,0),(2,1))
+  })
+)
 
 === 缩写词表
 

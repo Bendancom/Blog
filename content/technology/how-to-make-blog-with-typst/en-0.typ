@@ -147,11 +147,12 @@ For mathematics and physics packages, almost all are compatible as long as they 
 
 === Drawing
 
-#canvas({
-  import cetz.draw: *
-  circle((0,0))
-  line((0,0),(2,1))
-})
+#canvas(cetz.canvas({
+    import cetz.draw: *
+    circle((0,0))
+    line((0,0),(2,1))
+  })
+)
 
 === Abbreviation list
 

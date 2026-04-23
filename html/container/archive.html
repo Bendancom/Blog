@@ -4,35 +4,65 @@
 
 <script>
 	(() => {
+		let type = localStorage.getItem("Selector");
+		if (type == null) {
+			localStorage.setItem("Selector","all");
+			type = "all"
+		}
 		const params = new URLSearchParams(window.location.search);
 
 		const single = document.getElementsByClassName("archive-item-wrapper single");
 		const series = document.getElementsByClassName("archive-item-wrapper series");
 
 		for (var i = 0; i < single.length; i++) {
+			if (type == "series") {
+				single[i].style.display = "none";
+			}
+
 			const category = single[i].getAttribute("data-category");
 			const tags = single[i].getAttribute("data-tags").split(" ");
 			const authors = single[i].getAttribute("data-authors").split(" ");
 
 			if (category != "" && params.get("category") != null) {
 				if (category != params.get("category")) {
-					continue;
+					single[i].children[0].style.display = "none";
+					continue
 				}
 			}
 			if (tags.length > 0 && params.get("tag") != null) {
-				if (tags.indexOf(params.get("tag")) == -1) {
-					continue;
+				var have = false;
+				for (var k = 0; k < tags.length; k++) {
+					if (tags[k].indexOf(params.get("tag")) != -1) {
+						have = true;
+						break;
+					}
+				}
+				if (!have) {
+					single[i].children[0].style.display = "none";
+					continue
 				}
 			}
 			if (authors.length > 0 && params.get("author") != null) {
-				if (authors.indexOf(params.get("author")) == -1) {
-					continue;
+				var have = false;
+				for (var k = 0; k < authors.length; k++) {
+					if (authors[k].indexOf(params.get("author")) != -1) {
+						have = true;
+						break;
+					}
+				}
+				if (!have) {
+					single[i].children[0].style.display = "none";
+					continue
 				}
 			}
-			single[i].children[0].style.display = "flex"
+			single[i].children[0].style.display = "flex";
 		}
 
 		for (var i = 0; i < series.length; i++) {
+			if (type == "single") {
+				series[i].style.display = "none";
+			}
+
 			const seriesLinks = series[i].getElementsByClassName("archive-series-link");
 			var size = 0;
 			for (var j = 0; j < seriesLinks.length; j++) {
@@ -46,13 +76,27 @@
 					}
 				}
 				if (tags.length > 0 && params.get("tag") != null) {
-					if (tags.indexOf(params.get("tag")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < tags.length; k++) {
+						if (tags[k].indexOf(params.get("tag")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 				if (authors.length > 0 && params.get("author") != null) {
-					if (authors.indexOf(params.get("author")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < authors.length; k++) {
+						if (authors[k].indexOf(params.get("author")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 
@@ -76,13 +120,27 @@
 					}
 				}
 				if (tags.length > 0 && params.get("tag") != null) {
-					if (tags.indexOf(params.get("tag")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < tags.length; k++) {
+						if (tags[k].indexOf(params.get("tag")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 				if (authors.length > 0 && params.get("author") != null) {
-					if (authors.indexOf(params.get("author")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < authors.length; k++) {
+						if (authors[k].indexOf(params.get("author")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 
@@ -113,13 +171,27 @@
 					}
 				}
 				if (tags.length > 0 && params.get("tag") != null) {
-					if (tags.indexOf(params.get("tag")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < tags.length; k++) {
+						if (tags[k].indexOf(params.get("tag")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 				if (authors.length > 0 && params.get("author") != null) {
-					if (authors.indexOf(params.get("author")) == -1) {
-						continue;
+					var have = false;
+					for (var k = 0; k < authors.length; k++) {
+						if (authors[k].indexOf(params.get("author")) != -1) {
+							have = true;
+							break;
+						}
+					}
+					if (!have) {
+						continue
 					}
 				}
 
@@ -137,39 +209,6 @@
 			if (date != null) {
 				date.style.display = "flex"
 			}
-		}
-
-		let type = localStorage.getItem("Selector");
-		if (type == null) {
-			localStorage.setItem("Selector","all");
-			type = "all"
-		}
-
-		switch (type) {
-			case "single":
-				for (var i = 0; i < single.length; i++) {
-					single[i].style.display = "block";
-				}
-				for (var i =0; i < series.length; i++) {
-					series[i].style.display = "none";
-				}
-				break;
-			case "series":
-				for (var i =0; i < single.length; i++) {
-					single[i].style.display = "none";
-				}
-				for (var i =0; i < series.length; i++) {
-					series[i].style.display = "block";
-				}
-				break;
-			case "all":
-				for (var i =0; i < single.length; i++) {
-					single[i].style.display = "block";
-				}
-				for (var i =0; i < series.length; i++) {
-					series[i].style.display = "block";
-				}
-				break;
 		}
 	}) ()
 </script>

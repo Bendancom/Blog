@@ -1,9 +1,7 @@
-#import "@preview/cetz:0.4.2"
-
-#let canvas(..args) = context {
+#let canvas(content) = context {
   if target() == "html" {
-    html.div(role: "img", html.frame(cetz.canvas(..args)))
+    html.div(role: "img", html.frame(content))
   } else {
-    cetz.canvas(..args)
+    content
   }
 }

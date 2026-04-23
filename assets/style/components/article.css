@@ -69,9 +69,14 @@ div[role="img"] {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 100%;
 	padding-top: var(--space-sm);
 	padding-bottom: var(--space-sm);
 }
+div[role="img"] svg {
+	width: 100%;
+}
+
 div[role=grid] {
 	display: grid;
 	gap: var(--space-sm);

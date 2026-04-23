@@ -11,3 +11,14 @@
 	transition: height var(--transition-slow) ease-out;
 	position: relative;
 }
+
+.archive-item-wrapper .hidden {
+	display: none;
+}
+
+.archive-item-wrapper .series-hidden {
+	display: none;
+}
+.archive-item-wrapper .single-hidden {
+	display: none;
+}

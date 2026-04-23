@@ -892,7 +892,7 @@ def generatePosts(metadatas: list,alltags: list,allcategories: dict):
         if prevPost is not None and prevPost["isBuild"]:
             isBuild = True
         if nextPost is not None and nextPost["isBuild"]:
-            isBuild = True
+                isBuild = True
         if metadata["isBuild"]:
             isBuild = True
         if not isBuild:
@@ -1108,14 +1108,14 @@ def generateArchive(lang: str,metadatas: list,alltags: list,allcategories: dict,
         outputFile= OUTPUT_DIR / lang / "archive" / "index.html"
     )
 
-def generateAbout(lang: str,about: dict,alltags: list,allcategories: dict,languageList: list):
-    about = aboutContainer.substitute({
-        "about": about[lang]["content"]
+def generateAbout(about: dict,alltags: list,allcategories: dict,languageList: list):
+    aboutContent = aboutContainer.substitute({
+        "about": about["content"]
     })
 
     component = {
         "head": generateHead(
-            metadata,
+            about["metadata"],
             JS["About"],
             Styles["About"],
             haveLicense=True,
@@ -1124,21 +1124,21 @@ def generateAbout(lang: str,about: dict,alltags: list,allcategories: dict,langua
             haveSEO=True
         ),
         "navbar": generateNavbar(
-            metadata,
+            about["metadata"],
             selector=False,
             finder=False,
             languageList=languageList,
             languageSwitch=True
         ),
-        "sidebar": generateSideBar(about[lang]["metadata"],alltags,allcategories)
+        "sidebar": generateSideBar(about["metadata"],alltags,allcategories)
     }
 
     generateTemplate(
         template=templates["within-sidebar"],
         component=component,
-        container=about,
-        lang=metadata["lang"][0:2],
-        outputFile= OUTPUT_DIR / metadata["lang"][0:2] / "about" / "index.html"
+        container=aboutContent,
+        lang=about["metadata"]["lang"][0:2],
+        outputFile= OUTPUT_DIR / about["metadata"]["lang"][0:2] / "about" / "index.html"
     )
 
 def build():
@@ -1181,6 +1181,10 @@ def build():
                 print(f"Compiling {file.relative_to(BASE_DIR)}")
                 metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
                 metadata["isBuild"] = True
+        else:
+            print(f"Compiling {file.relative_to(BASE_DIR)}")
+            metadata["content"] = compileTypst(CONTENT_DIR / metadata["relativePath"])
+            metadata["isBuild"] = True
 
         metadatas[lang].append(metadata)
 
@@ -1219,11 +1223,8 @@ def build():
             allcategories[lang],
             languageList=languagelist
         )
-        if lang in dict(about):
-            pprint(lang)
-            pprint(about)
+        if lang in about:
             generateAbout(
-                lang,
                 about[lang],
                 alltags[lang],
                 allcategories[lang],

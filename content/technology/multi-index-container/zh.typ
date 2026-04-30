@@ -1,0 +1,563 @@
+#import "/typ/post.typ": post
+
+#show: post.with(
+  title: [多索引泛型容器类的实现],
+  subtitle: none,
+  authors: ("岑白"),
+  description: [C++中实现了单映射STL容器std::map，但实际业务中需要的是多映射类型的对任意数据的快速查找。],
+  date: datetime(year: 2024,month: 6,day: 8),
+  lastModDate: none,
+  category: "技术",
+  tags: ("C++","多索引","容器"),
+  order: none,
+  image: none,
+  lang: "zh",
+)
+
+`C++`中实现了单映射`STL`容器`std::map`，但实际业务中需要的是多映射类型的对任意数据的快速查找。虽可以使用多个`std::map`，但这对空间浪费过大，因而作者自行实现一个简易的多索引泛型容器库。
+
+= 实现思路
+
+使用关联容器或自定义关联容器存储索引
+使用容器存储数据表，容器类型可根据`IO`特性自行调整
+
+- 键：数据的引用，以减少重复数据。
+- 值：数据在总表中的位置(指针)。
+
+容器是不能存储引用的，使用`std::reference_wrapper`来包装引用并存储
+使用 `std::tuple` 封装数据。
+
+= 标准库使用
+
+- `<type_traits>`
+- `<ranges>`
+- `<tuple>`
+- `<vector>`
+- `<concepts>`
+
+= 泛型
+
+== 索引类的键值对类型
+
+=== 键
+
+`std::reference_wrapper` 的本质是指针，即在内存中占用`sizeof(size_t)`大小字节，由此可进行分类：
+
+- 大于等于`sizeof(size_t)`的使用 `std::reference_wrapper`
+- 小于`sizeof(size_t)`的使用其本身
+
+那么类型别名模板如下：
+
+```C++
+template <typename T>
+using map_key = std::conditional_t<sizeof(T) < sizeof(size_t), T, std::reference_wrapper<T>>;
+```
+
+=== 值
+
+- 泛型容器，其索引值为该泛型容器的迭代器
+- 随机访问容器，其索引值可优化为内存地址
+
+为泛型选择了第一种。
+
+```C++
+template <template <typename T, typename... Args> typename container, typename... Args>
+using map_value = std::ranges::iterator_t<container<std::tuple<Args...>>>;
+```
+
+== 索引容器包装/解封
+
+=== `map_wrapper`
+
+对单个索引容器的包装
+
+==== `map_wrapper`封装
+
+```C++
+template <template <typename, typename, typename... Args> typename T>
+struct map_wrapper {};
+```
+
+==== `map_wrapper_expand`
+
+运用模板特化读取封装的单个索引容器类型，后接两个类型：
+
+- `K`: 键类型
+- `V`: 值类型
+
+直接组成一个完好的索引类。
+
+```C++
+template <typename T, typename K, typename V>
+struct map_wrapper_expand;
+template <
+    template <template <typename, typename, typename... Args> typename args> typename T,
+    template <typename, typename, typename... Args> typename Other,
+    typename K,
+    typename V>
+struct map_wrapper_expand<T<Other>, K, V>
+{
+    using type = Other<K, V>;
+};
+```
+
+=== `maps_wrapper`
+
+对不同索引的整体封装
+
+==== `maps_wrapper` 封装
+
+```C++
+export template <template <typename, typename, typename... Args> typename... Others>
+struct maps_wrapper {};
+```
+
+==== `maps_wrapper_expand`
+
+通过对 `maps_wrapper`的展开，对其中的每个索引容器单独使用 `map_wrapper` 封装，后组合成 `std::tuple` 的二层封装结构
+
+```C++
+template<typename T>
+struct maps_wrapper_expand;
+template<template<template<typename, typename, typename... Args>typename... args>typename T, template<typename, typename, typename... Args>typename...Others>
+struct maps_wrapper_expand<T<Others...>> {
+    using type = std::tuple<map_wrapper<Others>...>;
+};
+```
+
+==== 踩坑
+
+```C++
+template<typename T>
+struct maps_wrapper_expand;
+template<template<template<typename, typename, typename... Args>typename... args>typename T, template<typename, typename, typename... Args>typename...Others>
+struct maps_wrapper_expand<T<Others...>> {
+    template<typename V,typename... K>
+    using type = std::tuple<Others<K,V>...>;
+};
+```
+
+这个方法看起来可以直接一步到位，只要如下使用即可：
+
+```C++
+maps_wrapper_expand<
+    maps_wrapper<
+        std::map,
+        std::map>>
+::type<
+        long double,
+        int,
+        int
+>   maps; 
+```
+
+以上确实能通过编译。
+
+但在引入模板后，不能通过编译。
+模板如下：
+
+```C++
+template<typename Maps,typename V,typename... K>
+using maps_tuple_t =maps_wrapper_expand<Maps>::type<V,K...>; 
+```
+
+探查下来问题大概出在可变参数模板类内的类型别名模板定义，不能在可变参数模板类中嵌套类型别名模板。
+
+=== `maps_tuple_before`
+
+原理是将两种可变参数分别按顺序封装到 `std::tuple` 中，再利用 `size_t... N` 统一进行展开并拼装为完整的索引类，最后封装至`std::tuple`中。
+使用`map_wrapper_expand`来进行拼装
+
+```C++
+template <typename T, typename K, typename V, typename Index>
+struct maps_tuple_before;
+template <typename T, typename K, typename V, size_t... N>
+struct maps_tuple_before<T, K, V, std::index_sequence<N...>>
+{
+    using type = std::tuple<typename map_wrapper_expand<
+        std::tuple_element_t<N, typename maps_wrapper_expand<T>::type>,
+        std::tuple_element_t<N, K>,
+        V>::type...>;
+};
+```
+
+=== `maps_tuple`
+
+这就是最终的对索引容器处理的类，是对`maps_tuple_before`进行一个模板简化。
+在其上增添了自动生成 `std::index_sequence<N...>`
+
+```C++
+template <
+    template <typename T, typename... container_args> typename container,
+    typename associative_containers,
+    typename... args>
+struct maps_tuple
+{
+    using type = maps_tuple_before<
+        associative_containers,
+        std::tuple<map_key<args>...>,
+        map_value<container, args...>,
+        std::make_index_sequence<sizeof...(args)>>::type;
+};
+```
+
+== `multi_index`
+
+使用约束与模板进行泛型匹配
+应有如下类型
+
+- 数据容器
+- 索引容器包装，其中含有各数据所需索引容器类型
+- 数据
+
+=== 模板
+
+``` C++
+template <
+    template <typename T, typename... container_args> typename container,
+    typename associative_containers,
+    typename... args>
+requires requires (......)
+{
+    ......
+}
+class multi_index{
+    ......
+};
+```
+
+=== 约束
+
+由于泛型的需求，其`requires`要求应为最普适，即：
+
+- 数据表容器应为 `common_range`&`sized_range`类型
+- 数据量应与索引容器量一致
+- 索引表容器应为 `common_range`类型，并可被`std::get`函数解包，且有如下函数：
+  - `find`
+  - `insert`
+  - `erase`
+  - `count`
+
+而索引总类是由 `std::tuple`进行包装的，因而须函数展开进行约束计算。
+
+```C++
+requires requires(
+    maps_tuple_t<container, associative_containers, args...> maps,
+    map_key<args>... keys,
+    map_value<container, args...> value) {
+    std::ranges::common_range<container<std::tuple<args...>>>;
+    std::ranges::sized_range<container<std::tuple<args...>>>;
+    sizeof...(args) == std::tuple_size_v<decltype(maps)>;
+    // common_range
+    [&maps]<size_t... N>(std::index_sequence<N...>) -> bool
+    {
+        return (... && std::ranges::common_range<std::tuple_element_t<N, decltype(maps)>>);
+    }(std::make_index_sequence<sizeof...(args)>{});
+    // find
+    [&maps]<size_t... N>(std::index_sequence<N...>, auto &&...keys) -> bool
+    {
+        return (... && std::same_as<
+                           decltype(std::ranges::begin(std::get<N>(maps))),
+                           decltype(std::get<N>(maps).find(keys))>);
+    }(std::make_index_sequence<sizeof...(args)>{}, keys...);
+    // count
+    [&maps]<size_t... N>(std::index_sequence<N...>, auto &&...keys) -> bool
+    {
+        return (... && std::same_as<decltype(std::ranges::begin(std::get<N>(maps))),
+                                    decltype(std::get<N>(maps).count(keys))>);
+    }(std::make_index_sequence<sizeof...(args)>{}, keys...);
+    // erase
+    [&maps]<size_t... N>(std::index_sequence<N...>) -> bool
+    {
+        return (... && std::same_as<
+                           decltype(std::ranges::begin(std::get<N>(maps))),
+                           decltype(std::get<N>(maps).erase(std::ranges::begin(std::get<N>(maps))))>);
+    }(std::make_index_sequence<sizeof...(args)>{});
+    // insert
+    [&maps, &value]<size_t... N>(std::index_sequence<N...>, auto &&...keys) -> bool
+    {
+        return (... && std::same_as<
+                           decltype(std::ranges::begin(std::get<N>(maps))),
+                           decltype(std::get<N>(maps).insert({keys, value}))>);
+    }(std::make_index_sequence<sizeof...(args)>{}, keys...);
+    // can decompress by function std::get<0>
+    [&maps]<size_t... N>(std::index_sequence<N...>, auto &&...keys) -> bool
+    {
+        return (... && std::same_as<
+                           decltype(keys),
+                           decltype(std::get<0>(*std::ranges::begin(std::get<N>(maps))))>);
+    }(std::make_index_sequence<sizeof...(args)>{}, keys...);
+    // can decompress by function std::get<1>
+    [&maps, &value]<size_t... N>(std::index_sequence<N...>) -> bool
+    {
+        return (... && std::same_as<
+                           decltype(value),
+                           decltype(std::get<1>(*std::ranges::begin(std::get<N>(maps))))>);
+    }(std::make_index_sequence<sizeof...(args)>{});
+}
+```
+
+= 函数实现
+
+== 辅助函数
+
+模板约束中并未对索引容器要求`clear`与`swap`函数，因而需`requires`检验
+
+```C++
+template <size_t... N>
+constexpr void make_indexs(iterator data, std::index_sequence<N...>)
+{
+    (std::get<N>(map).insert({std::get<N>(*data), data}), ...);
+}
+template <size_t... N>
+constexpr void erase_indexs(const iterator &iter, std::index_sequence<N...>)
+{
+    (std::get<N>(map).erase(std::get<N>(map).find(std::get<N>(*iter))), ...);
+}
+template <size_t... N>
+constexpr void clear_indexs(std::index_sequence<N...>)
+    requires requires(multi_index_t th) { (std::get<N>(th).clear(), ...); }
+{
+    (std::get<N>(map).clear, ...);
+}
+template <size_t... N>
+constexpr void swap_indexs(multi_index_t &other, std::index_sequence<N...>)
+    requires requires(multi_index_t th, multi_index_t other) { (std::get<N>(th).swap(std::get<N>(other)), ...); }
+{
+    (std::get<N>(map).swap(std::get<N>(other).map), ...);
+}
+```
+
+== 初始化
+
+=== `default`
+
+```C++
+constexpr multi_index() {}
+```
+
+=== `Range`
+
+```C++
+template <std::ranges::input_range Rng>
+    requires requires { std::convertible_to<std::ranges::range_reference_t<Rng>, data_list_t>; }
+constexpr multi_index(Rng &&t) : data_sheet(std::ranges::to<data_sheet_t>(t))
+{
+    for (iterator iter = data_sheet.begin(); iter != data_sheet.end(); iter++)
+        make_indexs(iter, std::make_index_sequence<sizeof...(Args)>{});
+}
+```
+
+=== `copy`/`move`
+
+```C++
+constexpr multi_index(const multi_index<container, associative_container, Args...> &d) : 
+    data_sheet(d.data_sheet), map(d.map) {}
+```
+
+== 迭代
+
+=== `begin`/`cbegin`
+
+```C++
+constexpr iterator begin()
+{
+    return std::ranges::begin(data_sheet);
+}
+constexpr const_iterator cbegin() const
+{
+    return std::ranges::cbegin(data_sheet);
+}
+```
+
+=== `end`/`cend`
+
+```C++
+constexpr iterator end()
+{
+    return std::ranges::end(data_sheet);
+}
+constexpr const_iterator cend() const
+{
+    return std::ranges::cend(data_sheet);
+}
+```
+
+=== `rbegin`/`crbegin`
+
+```C++
+constexpr reverse_iterator rbegin()
+    requires requires(data_sheet_t data) { data.rbegin(); }
+{
+    return data_sheet.rbegin();
+}
+constexpr const const_reverse_iterator crbegin() const
+    requires requires(data_sheet_t data) { data.crbegin(); }
+{
+    return data_sheet.crbegin();
+}
+```
+
+=== `rend`/`crend`
+
+```C++
+constexpr reverse_iterator rend()
+    requires requires(data_sheet_t data) { data.rend(); }
+{
+    return data_sheet.rend();
+}
+constexpr const const_reverse_iterator crend() const
+    requires requires(data_sheet_t data) { data.crend(); }
+{
+    return data_sheet.crend();
+}
+```
+
+== 查询
+
+=== `size`
+
+```C++
+constexpr size_t size() const
+{
+    return data_sheet.size();
+}
+```
+
+=== `empty`
+
+```C++
+constexpr bool empty() const
+    requires requires(data_sheet_t data) { data.empty(); }
+{
+    return data_sheet.empty();
+}
+```
+
+== 修改
+
+=== `insert`/`insert_range`
+
+```C++
+constexpr iterator insert(const iterator &iter, const data_list_t &data)
+{
+    iterator tmp = data_sheet.insert(iter, data);
+    make_indexs(tmp, std::make_index_sequence<sizeof...(Args)>{});
+    return tmp;
+}
+template<std::input_range Rng>
+    requires requires { std::convertible_to<std::ranges::range_reference_t<Rng>, data_list_t>; }
+constexpr iterator insert_range(const iterator &iter, Rng &&data)
+{
+    const size_t size = data.size();
+    iterator tmp = data_sheet.insert_range(iter, data);
+    iterator i = tmp;
+    for (size_t j = 0; j < size; j++)
+    {
+        make_indexs(i, std::make_index_sequence<sizeof...(Args)>{});
+        i++;
+    }
+    return tmp;
+}
+```
+
+=== `push_back`/`append_range`
+
+```C++
+constexpr void push_back(const data_list_t &data)
+{
+    data_sheet.push_back(data);
+    make_indexs(std::prev(std::ranges::end(data_sheet)), std::make_index_sequence<sizeof...(Args)>{});
+    return;
+}
+template<std::input_range Rng>
+    requires requires { std::convertible_to<std::ranges::range_reference_t<Rng>, data_list_t>; }
+constexpr void append_range(Rng &&data)
+{
+    iterator tmp = std::prev(data.end());
+    data_sheet.append_range(data);
+    for (tmp++; tmp != data.end(); tmp++)
+        make_indexs(tmp, std::make_index_sequence<sizeof...(Args)>{});
+}
+constexpr void clear()
+    requires requires(data_sheet_t data, maps_tuple_t maps) { data.clear(); maps.clear(); }
+{
+    data_sheet.clear();
+    clear_indexs(std::make_index_sequence<sizeof...(args)>{});
+}
+```
+
+=== `erase`/`pop_back`/`clear`/`pop_front`
+
+```C++
+constexpr iterator erase(const iterator &iter)
+    requires requires(data_sheet_t data, iterator iter) { data.erase(iter); }
+{
+    erase_indexs(iter, std::make_index_sequence<sizeof...(args)>{});
+    return data_sheet.erase(iter);
+}
+constexpr void pop_back()
+    requires requires(data_sheet_t data) { data.pop_back(); }
+{
+    erase_indexs(data_sheet.end()--, std::make_index_sequence<sizeof...(args)>{});
+    data_sheet.pop_back();
+}
+constexpr void clear()
+    requires requires(data_sheet_t data, maps_tuple_t maps) { data.clear(); maps.clear(); }
+{
+    data_sheet.clear();
+    clear_indexs(std::make_index_sequence<sizeof...(args)>{});
+}
+constexpr void pop_front()
+    requires requires(data_sheet_t data) { data.pop_front(); }
+{
+    erase_indexs(data_sheet.begin(), std::make_index_sequence<sizeof...(args)>{});
+    data_sheet.pop_front();
+}
+
+```
+
+=== `swap`/`resize`
+
+```C++
+constexpr void resize(const size_t &size)
+    requires requires(data_sheet_t data, size_t size) { data.resize(size); }
+{
+    data_sheet.resize(size);
+}
+constexpr void swap(multi_index<container, associative_containers, args...> &other)
+    requires requires(data_sheet_t data, data_sheet_t &other) { data.swap(other); }
+{
+    data_sheet.swap(other.data_sheet);
+    swap_indexs(other.map, std::make_index_sequence<sizeof...(args)>{});
+}
+```
+
+== 查找
+
+=== `find`
+
+```C++
+template <size_t N>
+constexpr std::vector<iterator> find(const std::tuple_element_t<N, data_list_t> &data)
+{
+    std::vector<iterator> tmp;
+    auto iter = std::get<N>(map).find(data);
+    if (iter != std::get<N>(map).end())
+        for (size_t i = 0; i < std::get<N>(map).count(std::get<0>(*iter)); i++)
+            tmp.push_back(std::get<1>(*++iter));
+    return tmp;
+}
+```
+
+= 总代码
+
+位于`github` 仓库中 #link("https://github.com/Bendancom/BlogCodes")[https://github.com/Bendancom/BlogCodes]
+
+= TODO
+
+- `map_wrapper`在单种容器下的自动展开
+- `std::formatter`重载
+- 更简单的初始化，如`std::make_tuple`
+
+#bibliography("refs.yml")

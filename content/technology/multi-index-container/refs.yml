@@ -1,0 +1,14 @@
+paomo-reference-wrapper-2023:
+  type: Blog
+  title: 【C++ 包装器类 std::reference\_wrapper 】全面指南：深入理解与应用C++ std::reference\_wrapper——从基础教程到实际案例分析
+  author: 泡沫o0
+  date: 2023-09-26
+  url: https://blog.csdn.net/qq_21438461/article/details/131297103
+  publisher: CSDN
+modern-cpp-templates-2023:
+  type: Blog
+  title: Modern C++ 学习笔记（20）——高级模板
+  author: 下学期上五年级
+  date: 2023-06-10
+  url: https://zhuanlan.zhihu.com/p/636178655 
+  publisher: 知乎

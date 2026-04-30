@@ -34,6 +34,9 @@ symbolList = "符号表"
 [abbr.zh]
 PDE = "偏微分方程"
 AI = "人工智能"
+PPI = "单位英寸像素量"
+SIMD = "单指令多数据流"
+MIMD = "多指令多数据流"
 
 [config.en]
 siteTitle = "Bendancom's blog"
@@ -71,3 +74,6 @@ symbolList = "List of Symbol"
 [abbr.en]
 PDE = "Partial Differential Equation"
 AI = "Artificial Intelligence"
+PPI = "Pixel Per Inch"
+SIMD = "Single Instruction Multiple Data"
+MIMD = "Multiple Instruction Multiple Data"

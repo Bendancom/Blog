@@ -24,10 +24,6 @@ p {
 	word-wrap: break-word;
 }
 
-table {
-	margin: auto;
-}
-
 pre.code-block {
 	background-color: var(--codeblock-bg);
 	margin-top: 0;
@@ -89,6 +85,7 @@ div[role="cell"] {
 }
 
 table {
+	margin: auto;
 	width: 100%;
 	line-height: 1.5rem;
 	border-top: 2px solid var(--text-90);

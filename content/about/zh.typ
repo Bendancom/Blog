@@ -3,7 +3,7 @@
 #show: post.with(
   title: [关于],
   subtitle: none,
-  authors: ("岑白"),
+  authors: ("岑白Bd"),
   date: none,
   lastModDate: none,
   description: [关于岑白],

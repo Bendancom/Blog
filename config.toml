@@ -7,7 +7,7 @@ defaultLanguage = "zh"
 
 [SEO]
 google = { name = "google-site-verification", key = "pwaT5WWNlN9GKBzYINHWt83Pst12qFw3kwEzVwpxyeQ" }
-bing = { name = "msvalidate.01", key = "4056CAD5A32658E06A7A7E90B6D8C3B6" }
+bing = { name = "msvalidate.01", key = "FF29AF61EEB27B179ADBA684446D6E7B" }
 
 [social]
 email = "bendancom@qq.com"  # Author email

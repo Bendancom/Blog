@@ -244,11 +244,6 @@ for file in COMPONENTS_DIR.iterdir():
 
 def typstReplace(raw: str):
     replace = re.sub(
-        "(<div role=\"math\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)",
-        "\\1",
-        raw
-    )
-    replace = re.sub(
         "(<div role=\"img\">[\\s]+<svg class=\"typst-frame\" style=\"[\\w: ;]+)(width:[\\w .]+;)",
         "\\1",
         raw
@@ -288,7 +283,8 @@ def compileTypstStr(content: str) -> str:
         command,
         input=typst,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
 
     if result.returncode != 0:
@@ -299,7 +295,7 @@ def compileTypstStr(content: str) -> str:
     html = result.stdout
 
     bodyIndex = html.find("<body>") + 6
-    bodyRIndex = html.rfind("</body>") - 1
+    bodyRIndex = html.rfind("</body>")
     htmlContent = html[bodyIndex:bodyRIndex]
 
     return typstReplace(htmlContent.replace("<p>","").replace("</p>",""))
@@ -317,7 +313,7 @@ def getMetadata(file: Path) -> dict:
         str(file),
         "metadata"
     ]
-    result = subprocess.run(command,capture_output=True,text=True)
+    result = subprocess.run(command,capture_output=True,text=True,encoding="utf-8")
     if result.returncode != 0:
         print(f"Failed Parsing {file.relative_to(BASE_DIR)}")
         print(result.stderr)
@@ -392,6 +388,7 @@ def getMetadata(file: Path) -> dict:
 
     metadata["titleString"] = getString(metadata["title"])
     metadata["title"] = compileTypstStr("".join(metadata["title"]))
+
     metadata["premalink"] = Path(f"{metadata['lang'][0:2]}/posts")
     if metadata["order"] is not None:
         metadata["premalink"] = metadata["premalink"] / "series"
@@ -470,7 +467,7 @@ def compileTypst(file: Path) -> str:
         "-"
     ]
     
-    result = subprocess.run(command,capture_output=True,text=True)
+    result = subprocess.run(command,capture_output=True,text=True,encoding="utf-8")
     if result.returncode != 0:
         print(f"Failed Compile {file.relative_to(BASE_DIR)}")
         print(result.stderr)
@@ -479,7 +476,7 @@ def compileTypst(file: Path) -> str:
     html = result.stdout
 
     bodyIndex = html.find("<body>") + 6
-    bodyRIndex = html.rfind("</body>") - 1
+    bodyRIndex = html.rfind("</body>")
     htmlContent = html[bodyIndex:bodyRIndex]
 
     return typstReplace(htmlContent)
@@ -831,7 +828,7 @@ def generateTemplate(template: Template,component: dict,lang: str,container: str
         "year": config["copyright"]["year"],
         "sign": config["copyright"]["sign"],
         "license": config["copyright"]["license"]
-    }))
+    }), encoding="utf-8")
 
 def generateHome(lang: str,metadatas: list,alltags: list,allcategories: dict,languageList: list):
     cards = []
@@ -1251,7 +1248,7 @@ def build():
             metadatas[lang]
         )
 
-    print(f"\n✅ Build complete! Output directory: {OUTPUT_DIR}")
+    print(f"\nBuild complete! Output directory: {OUTPUT_DIR}")
     print(f"\nTo preview the site, run a local server:")
     print(f"  python -m http.server 8000 --directory {OUTPUT_DIR}")
 

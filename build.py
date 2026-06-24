@@ -1202,12 +1202,14 @@ def build():
         component={
             "supportLanguage": json.dumps(list(languagelist),ensure_ascii=False),
             "defaultLanguage": config["info"]["defaultLanguage"],
-            "sitemap": "\n".join([ f"<meta name=\"{seo["name"]}\" content=\"{seo["key"]}\" />" for seo in config["SEO"].values() ])
         },
         lang="",
         container="",
         outputFile= OUTPUT_DIR / "index.html"
     )
+
+    # Generate Identifies
+    copytree(BASE_DIR / "identify", OUTPUT_DIR , dirs_exist_ok=True)
 
     # Generate SiteMap Index
     generateSiteMapIndex(languagelist)

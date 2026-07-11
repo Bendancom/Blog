@@ -11,8 +11,10 @@
 <script>
 	const language = localStorage.getItem("Language");
 	if (language != null) {
+		if (language == "system") {
+			language = navigator.language.substring(0,2);
+		}
 		document.getElementById("language-switch").getElementsByClassName("current")[0].classList.remove("current");
-	
 		document.getElementById("language-switch").getElementsByClassName(language)[0].classList.add("current")
 	
 		document.getElementById("language-switch-menu").getElementsByClassName("current")[0].classList.remove("current");

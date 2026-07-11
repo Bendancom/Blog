@@ -28,23 +28,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Setup Python
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      # 2. Setup uv
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.12'
-
-      # 3. Setup Typst
-      - name: Setup Typst
-        uses: typst-community/setup-typst@v4
-        with:
-          typst-version: 'latest'
-          cache: true
+          python-version: '3.14'
 
       # 4. Run build script
       - name: Run build script
         run: |
-          python build.py deploy
+          uv run build.py deploy
 
       # 5. Validate build output
       - name: Validate build output

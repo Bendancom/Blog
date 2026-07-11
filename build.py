@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import io
 import os
 import re
 import subprocess
@@ -15,6 +16,8 @@ from collections import defaultdict
 
 # Test
 from pprint import pprint
+
+import typst
 
 # Configuration
 BASE_DIR = Path(__file__).parent
@@ -258,41 +261,20 @@ def typstReplace(raw: str):
     return replace
 
 def compileTypstStr(content: str) -> str:
-    command = [
-        "typst",
-        "compile",
-        "--features",
-        "html",
-        "--format",
-        "html",
-        "--root",
-        str(BASE_DIR),
-        "-",
-        "-"
-    ]
-
-    typst = f"""
+    typst_str = f"""
         #import "/typ/base.typ": base
         #import "/typ/html.typ": html-base
         #show: base
         #show: html-base
         {content}
     """
+    
+    # TODO: use typst.compile directly
+    # https://github.com/messense/typst-py/issues/173
+    html_bytes = typst.Compiler().compile(typst_str.encode(), format="html", root=BASE_DIR)
+    assert isinstance(html_bytes, bytes)
 
-    result = subprocess.run(
-        command,
-        input=typst,
-        capture_output=True,
-        text=True,
-        encoding="utf-8"
-    )
-
-    if result.returncode != 0:
-        print(f"Failed Compile {file.relative_to(BASE_DIR)}")
-        print(result.stderr)
-        return
-
-    html = result.stdout
+    html = html_bytes.decode()
 
     bodyIndex = html.find("<body>") + 6
     bodyRIndex = html.rfind("</body>")
@@ -303,24 +285,9 @@ def compileTypstStr(content: str) -> str:
 def getMetadata(file: Path) -> dict:
     print(f"Parsing {file.relative_to(BASE_DIR)}")
 
-    command = [
-        "typst",
-        "query",
-        "--features",
-        "html",
-        "--root",
-        str(BASE_DIR),
-        str(file),
-        "metadata"
-    ]
-    result = subprocess.run(command,capture_output=True,text=True,encoding="utf-8")
-    if result.returncode != 0:
-        print(f"Failed Parsing {file.relative_to(BASE_DIR)}")
-        print(result.stderr)
-        return
+    result = typst.query(input=file, root=BASE_DIR, selector="metadata")
 
-
-    jsondatas = json.loads(result.stdout)
+    jsondatas = json.loads(result)
     metadatas = []
     for i in jsondatas:
         if "metadata" in i["value"]:
@@ -454,26 +421,9 @@ def sortMetadata(metadatas: list) -> list:
     return result
 
 def compileTypst(file: Path) -> str:
-    command = [
-        "typst",
-        "compile",
-        "--features",
-        "html",
-        "--format",
-        "html",
-        "--root",
-        str(BASE_DIR),
-        str(file),
-        "-"
-    ]
+    html_bytes = typst.compile(format="html", root=BASE_DIR, input=file)
     
-    result = subprocess.run(command,capture_output=True,text=True,encoding="utf-8")
-    if result.returncode != 0:
-        print(f"Failed Compile {file.relative_to(BASE_DIR)}")
-        print(result.stderr)
-        return
-
-    html = result.stdout
+    html = html_bytes.decode()
 
     bodyIndex = html.find("<body>") + 6
     bodyRIndex = html.rfind("</body>")

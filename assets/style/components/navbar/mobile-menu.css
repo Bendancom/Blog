@@ -1,7 +1,7 @@
 #navbar-mobile-menu-wrapper {
 	display: none;
 	position: absolute;
-	top: 5.5rem;
+	top: 5rem;
 	z-index: 2;
 	right: 0;
 }
@@ -10,6 +10,7 @@
 	gap: var(--space-sm);
 	box-sizing: border-box;
 	padding: var(--space-sm);
+	border-radius: var(--radius-large);
 	background-color: var(--card-bg);
 }
 
@@ -30,4 +31,10 @@
 
 #navbar-mobile-menu a:active {
     transform: scale(0.95);
+}
+
+@media(min-width: 1024px){
+	#navbar-mobile-menu-switch {
+		display: none;
+	}
 }

@@ -1,4 +1,4 @@
-const button = document.getElementById("navbar-mobile-menu");
+const button = document.getElementById("navbar-mobile-menu-switch");
 button.addEventListener("click", () => {
 	const menu = document.getElementById("navbar-mobile-menu-wrapper");
 	if (menu.classList.toggle("hidden")) {

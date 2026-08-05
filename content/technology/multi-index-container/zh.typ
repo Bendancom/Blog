@@ -4,17 +4,17 @@
   title: [多索引泛型容器类的实现],
   subtitle: none,
   authors: ("岑白"),
-  description: [C++中实现了单映射STL容器std::map，但实际业务中需要的是多映射类型的对任意数据的快速查找。],
+  description: [cpp中实现了单映射STL容器std::map，但实际业务中需要的是多映射类型的对任意数据的快速查找。],
   date: datetime(year: 2024,month: 6,day: 8),
   lastModDate: none,
   category: "技术",
-  tags: ("C++","多索引","容器"),
+  tags: ("cpp","多索引","容器"),
   order: none,
   image: none,
   lang: "zh",
 )
 
-`C++`中实现了单映射`STL`容器`std::map`，但实际业务中需要的是多映射类型的对任意数据的快速查找。虽可以使用多个`std::map`，但这对空间浪费过大，因而作者自行实现一个简易的多索引泛型容器库。
+`cpp`中实现了单映射`STL`容器`std::map`，但实际业务中需要的是多映射类型的对任意数据的快速查找。虽可以使用多个`std::map`，但这对空间浪费过大，因而作者自行实现一个简易的多索引泛型容器库。
 
 = 实现思路
 
@@ -48,7 +48,7 @@
 
 那么类型别名模板如下：
 
-```C++
+```cpp
 template <typename T>
 using map_key = std::conditional_t<sizeof(T) < sizeof(size_t), T, std::reference_wrapper<T>>;
 ```
@@ -60,7 +60,7 @@ using map_key = std::conditional_t<sizeof(T) < sizeof(size_t), T, std::reference
 
 为泛型选择了第一种。
 
-```C++
+```cpp
 template <template <typename T, typename... Args> typename container, typename... Args>
 using map_value = std::ranges::iterator_t<container<std::tuple<Args...>>>;
 ```
@@ -73,7 +73,7 @@ using map_value = std::ranges::iterator_t<container<std::tuple<Args...>>>;
 
 ==== `map_wrapper`封装
 
-```C++
+```cpp
 template <template <typename, typename, typename... Args> typename T>
 struct map_wrapper {};
 ```
@@ -87,7 +87,7 @@ struct map_wrapper {};
 
 直接组成一个完好的索引类。
 
-```C++
+```cpp
 template <typename T, typename K, typename V>
 struct map_wrapper_expand;
 template <
@@ -107,7 +107,7 @@ struct map_wrapper_expand<T<Other>, K, V>
 
 ==== `maps_wrapper` 封装
 
-```C++
+```cpp
 export template <template <typename, typename, typename... Args> typename... Others>
 struct maps_wrapper {};
 ```
@@ -116,7 +116,7 @@ struct maps_wrapper {};
 
 通过对 `maps_wrapper`的展开，对其中的每个索引容器单独使用 `map_wrapper` 封装，后组合成 `std::tuple` 的二层封装结构
 
-```C++
+```cpp
 template<typename T>
 struct maps_wrapper_expand;
 template<template<template<typename, typename, typename... Args>typename... args>typename T, template<typename, typename, typename... Args>typename...Others>
@@ -127,7 +127,7 @@ struct maps_wrapper_expand<T<Others...>> {
 
 ==== 踩坑
 
-```C++
+```cpp
 template<typename T>
 struct maps_wrapper_expand;
 template<template<template<typename, typename, typename... Args>typename... args>typename T, template<typename, typename, typename... Args>typename...Others>
@@ -139,7 +139,7 @@ struct maps_wrapper_expand<T<Others...>> {
 
 这个方法看起来可以直接一步到位，只要如下使用即可：
 
-```C++
+```cpp
 maps_wrapper_expand<
     maps_wrapper<
         std::map,
@@ -156,7 +156,7 @@ maps_wrapper_expand<
 但在引入模板后，不能通过编译。
 模板如下：
 
-```C++
+```cpp
 template<typename Maps,typename V,typename... K>
 using maps_tuple_t =maps_wrapper_expand<Maps>::type<V,K...>; 
 ```
@@ -168,7 +168,7 @@ using maps_tuple_t =maps_wrapper_expand<Maps>::type<V,K...>;
 原理是将两种可变参数分别按顺序封装到 `std::tuple` 中，再利用 `size_t... N` 统一进行展开并拼装为完整的索引类，最后封装至`std::tuple`中。
 使用`map_wrapper_expand`来进行拼装
 
-```C++
+```cpp
 template <typename T, typename K, typename V, typename Index>
 struct maps_tuple_before;
 template <typename T, typename K, typename V, size_t... N>
@@ -186,7 +186,7 @@ struct maps_tuple_before<T, K, V, std::index_sequence<N...>>
 这就是最终的对索引容器处理的类，是对`maps_tuple_before`进行一个模板简化。
 在其上增添了自动生成 `std::index_sequence<N...>`
 
-```C++
+```cpp
 template <
     template <typename T, typename... container_args> typename container,
     typename associative_containers,
@@ -212,7 +212,7 @@ struct maps_tuple
 
 === 模板
 
-``` C++
+``` cpp
 template <
     template <typename T, typename... container_args> typename container,
     typename associative_containers,
@@ -240,7 +240,7 @@ class multi_index{
 
 而索引总类是由 `std::tuple`进行包装的，因而须函数展开进行约束计算。
 
-```C++
+```cpp
 requires requires(
     maps_tuple_t<container, associative_containers, args...> maps,
     map_key<args>... keys,
@@ -303,7 +303,7 @@ requires requires(
 
 模板约束中并未对索引容器要求`clear`与`swap`函数，因而需`requires`检验
 
-```C++
+```cpp
 template <size_t... N>
 constexpr void make_indexs(iterator data, std::index_sequence<N...>)
 {
@@ -332,13 +332,13 @@ constexpr void swap_indexs(multi_index_t &other, std::index_sequence<N...>)
 
 === `default`
 
-```C++
+```cpp
 constexpr multi_index() {}
 ```
 
 === `Range`
 
-```C++
+```cpp
 template <std::ranges::input_range Rng>
     requires requires { std::convertible_to<std::ranges::range_reference_t<Rng>, data_list_t>; }
 constexpr multi_index(Rng &&t) : data_sheet(std::ranges::to<data_sheet_t>(t))
@@ -350,7 +350,7 @@ constexpr multi_index(Rng &&t) : data_sheet(std::ranges::to<data_sheet_t>(t))
 
 === `copy`/`move`
 
-```C++
+```cpp
 constexpr multi_index(const multi_index<container, associative_container, Args...> &d) : 
     data_sheet(d.data_sheet), map(d.map) {}
 ```
@@ -359,7 +359,7 @@ constexpr multi_index(const multi_index<container, associative_container, Args..
 
 === `begin`/`cbegin`
 
-```C++
+```cpp
 constexpr iterator begin()
 {
     return std::ranges::begin(data_sheet);
@@ -372,7 +372,7 @@ constexpr const_iterator cbegin() const
 
 === `end`/`cend`
 
-```C++
+```cpp
 constexpr iterator end()
 {
     return std::ranges::end(data_sheet);
@@ -385,7 +385,7 @@ constexpr const_iterator cend() const
 
 === `rbegin`/`crbegin`
 
-```C++
+```cpp
 constexpr reverse_iterator rbegin()
     requires requires(data_sheet_t data) { data.rbegin(); }
 {
@@ -400,7 +400,7 @@ constexpr const const_reverse_iterator crbegin() const
 
 === `rend`/`crend`
 
-```C++
+```cpp
 constexpr reverse_iterator rend()
     requires requires(data_sheet_t data) { data.rend(); }
 {
@@ -417,7 +417,7 @@ constexpr const const_reverse_iterator crend() const
 
 === `size`
 
-```C++
+```cpp
 constexpr size_t size() const
 {
     return data_sheet.size();
@@ -426,7 +426,7 @@ constexpr size_t size() const
 
 === `empty`
 
-```C++
+```cpp
 constexpr bool empty() const
     requires requires(data_sheet_t data) { data.empty(); }
 {
@@ -438,7 +438,7 @@ constexpr bool empty() const
 
 === `insert`/`insert_range`
 
-```C++
+```cpp
 constexpr iterator insert(const iterator &iter, const data_list_t &data)
 {
     iterator tmp = data_sheet.insert(iter, data);
@@ -463,7 +463,7 @@ constexpr iterator insert_range(const iterator &iter, Rng &&data)
 
 === `push_back`/`append_range`
 
-```C++
+```cpp
 constexpr void push_back(const data_list_t &data)
 {
     data_sheet.push_back(data);
@@ -489,7 +489,7 @@ constexpr void clear()
 
 === `erase`/`pop_back`/`clear`/`pop_front`
 
-```C++
+```cpp
 constexpr iterator erase(const iterator &iter)
     requires requires(data_sheet_t data, iterator iter) { data.erase(iter); }
 {
@@ -519,7 +519,7 @@ constexpr void pop_front()
 
 === `swap`/`resize`
 
-```C++
+```cpp
 constexpr void resize(const size_t &size)
     requires requires(data_sheet_t data, size_t size) { data.resize(size); }
 {
@@ -537,7 +537,7 @@ constexpr void swap(multi_index<container, associative_containers, args...> &oth
 
 === `find`
 
-```C++
+```cpp
 template <size_t N>
 constexpr std::vector<iterator> find(const std::tuple_element_t<N, data_list_t> &data)
 {

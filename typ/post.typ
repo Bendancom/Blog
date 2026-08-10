@@ -41,6 +41,7 @@
     keywords: tags,
   )
   set text(lang: lang)
+  set math.mat(delim: "[")
 
   show: base
 

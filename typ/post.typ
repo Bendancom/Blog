@@ -16,22 +16,23 @@
   order: int,
   image: str,
   lang: str,
-  content
+  content,
 ) = context {
   metadata((
     metadata: (
       title: title,
       subtitle: subtitle,
       authors: authors,
-      date: ( if date != none {date.display("[year]-[month]-[day]")} else {none} ),
-      lastModDate: ( if lastModDate != none { lastModDate.display("[year]-[month]-[day]") } else {none} ),
+      date: (if date != none { date.display("[year]-[month]-[day]") } else { none }),
+      lastModDate: (if lastModDate != none { lastModDate.display("[year]-[month]-[day]") } else { none }),
       description: description,
       category: category,
       tags: tags,
       order: order,
       image: image,
       lang: lang,
-  )))
+    ),
+  ))
 
   set document(
     title: title,
@@ -41,7 +42,6 @@
     keywords: tags,
   )
   set text(lang: lang)
-  set math.mat(delim: "[")
 
   show: base
 

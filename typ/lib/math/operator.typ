@@ -2,3 +2,4 @@
 #let dim = math.op("dim",limits: false)
 #let argmin = math.op("argmin",limits: true)
 #let argmax = math.op("argmax",limits: true)
+#let sgn = math.op("sgn",limits: false)

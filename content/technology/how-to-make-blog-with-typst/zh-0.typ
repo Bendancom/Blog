@@ -6,18 +6,16 @@
 #show: post.with(
   title: [如何使用`Typst`创建博客],
   subtitle: [前言],
-  authors: ("岑白Bd"),
+  authors: "岑白Bd",
   description: [为什么要选择`Typst`作为博客写作的标记语言，为什么要写这一个系列],
-  date: datetime(year: 2026,month: 4,day: 12),
+  date: datetime(year: 2026, month: 4, day: 12),
   lastModDate: none,
   category: "技术",
-  tags: ("Typst","博客"),
+  tags: ("Typst", "博客"),
   order: 0,
   image: none,
   lang: "zh",
 )
-
-#show: abbr
 
 = 为什么用`Typst`来写博客
 
@@ -29,7 +27,7 @@
 
 举个例子，按标准规定的微分符号的写法：
 
-$ dif y =  4 dif x $
+$ dif y = 4 dif x $
 
 这是`Typst`实现：
 
@@ -79,8 +77,6 @@ dif y = 4 dif x
 
 在遥远的北方，有一座被群山环绕的小城。每逢冬季，大雪便会覆盖整片山谷，将屋顶和街道染成纯净的白色。清晨时分，炊烟从低矮的烟囱里袅袅升起，与雾气交织在一起，仿佛为这座安静的小城披上了一层薄纱。老人们习惯在炉火旁煮一壶热茶，听着窗外雪花簌簌落下的声音，慢慢度过漫长的午后。偶尔有孩子在巷子里堆雪人、打雪仗，清脆的笑声打破了冬日的沉寂。这里没有大城市的喧嚣与匆忙，时间仿佛流淌得格外缓慢，每一刻都值得细细品味。
 
-注：@AI:s 生成
-
 === 图片
 
 #figure(
@@ -93,11 +89,11 @@ dif y = 4 dif x
 #figure(
   table(
     columns: 3,
-    table.header([1],[2],[3]),
-    [222],[111],[333],
-    [444],[555],[666]
+    table.header([1], [2], [3]),
+    [222], [111], [333],
+    [444], [555], [666],
   ),
-  caption: [测试表格]
+  caption: [测试表格],
 )
 
 === 代码
@@ -120,11 +116,11 @@ const Point = struct {
 
 === 公式
 
-行内公式 $ee = dv(y,x)$
+行内公式 $ee = dv(y, x)$
 
 行间公式：
 $
-  f(x) = x_0 + x_1 ii + x_2 jj + x_3 kk \ 
+  f(x) = x_0 + x_1 ii + x_2 jj + x_3 kk \
   g(y) = y_0 + y_1 ii + y_2 jj + y_3 kk
 $
 
@@ -143,24 +139,11 @@ $
 对于数学、物理类的包几乎全适配，只要其走的是`Typst`的公式渲染
 
 - #link("https://typst.app/universe/package/cetz/")[cetz]
-- #link("https://typst.app/universe/package/abbr/")[abbr]
 
 === 绘图
 
 #canvas(cetz.canvas({
-    import cetz.draw: *
-    circle((0,0))
-    line((0,0),(2,1))
-  })
-)
-
-=== 缩写词表
-
-#{
-  show heading.where(level: 1): it => {}
-  abbr-list()
-}
-
-@PDE
-
-@PDE:s
+  import cetz.draw: *
+  circle((0, 0))
+  line((0, 0), (2, 1))
+}))

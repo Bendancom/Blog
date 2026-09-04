@@ -22,6 +22,7 @@ p {
 	white-space: pre-wrap;
 	overflow-wrap: break-word;
 	word-wrap: break-word;
+	line-height: 100%;
 }
 
 pre.code-block {
@@ -30,12 +31,11 @@ pre.code-block {
 	color: var(--text-50);
 	border-bottom-left-radius: var(--space-sm);
 	border-bottom-right-radius: var(--space-sm);
-	padding-bottom: var(--space-sm);
-	padding-left: var(--space-sm);
-	padding-right: var(--space-sm);
+	padding: var(--space-sm);
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	white-space: pre-wrap;
+	line-height: 75%;
 }
 
 details.code-wrapper > summary {

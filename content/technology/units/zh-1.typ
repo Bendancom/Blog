@@ -1,22 +1,21 @@
 #import "/typ/post.typ": post
 #import "/typ/lib.typ": *
-#import "@preview/unify:0.7.1": qty,num,unit
-#import "@preview/physica:0.9.8": vb, va, dmat
+#import "@preview/physica:0.9.8": dmat, va, vb
+#import "@preview/zero:0.7.0": num, quan
 
 #show: post.with(
   title: [单位库实现],
   subtitle: [理论理解],
-  date: datetime(year: 2026,month: 8,day: 7),
+  date: datetime(year: 2026, month: 8, day: 7),
   lastModDate: none,
   authors: "岑白Bd",
   description: [在现实世界中的物理规律都需要物理单位，相较于直接进行数字的计算，带有物理量的计算可进行量纲校验与单位换算。],
-  tags: ("单位", "物理","理论","量纲"),
+  tags: ("单位", "物理", "理论", "量纲"),
   category: "技术",
   order: 1,
   image: none,
   lang: "zh",
 )
-
 
 = 前置需求
 
@@ -47,7 +46,7 @@
 === 单位制词头 <metricPrefix>
 
 单位制词头用于描述一个物理量进行了多少缩放，其与尺规的区别为不改变单位，只是对数值的缩写，用处是大幅缩减无关的数值部分的表述长度，
-如#qty(1,"Gm")和#qty(1000000000,"m")物理意义上相同，但前一个更简洁直观。
+如#quan[1 Gm]和#quan[1000000000 m]物理意义上相同，但前一个更简洁直观。
 
 === 尺规 <magnitude>
 
@@ -81,7 +80,7 @@ $
 
 - 同态：$f(u_1 dot u_2) = f(u_1) + f(u_2)$
 - 单射：如果$f(u_1) = f(u_2)$，则$u_1 = u_2$
-- 满射：$forall x in QQ^(n),exists u in U$，使$ f^(-1)(x) = u$
+- 满射：$forall x in QQ^(n),exists u in U$，使$f^(-1)(x) = u$
 
 同构意味着在代数结构上，$U$与$QQ^(n)$没有区别。
 
@@ -96,7 +95,7 @@ $
 `Hadamard`积：逐元素积
 
 $
-  vb(a) dot.o vb(b) = vec(a_1 b_1, dots.v , a_n b_n)
+  vb(a) dot.o vb(b) = vec(a_1 b_1, dots.v, a_n b_n)
 $
 `Hadamard`幂：逐元素幂
 
@@ -108,7 +107,7 @@ $
 
 指如何测量同一坐标系下的两点之间的距离，形如：
 $
-  cal(l)_n (vb(x)) = norm(vb(x))_n =  root(n, sum_(i=1)^(n)x_i^n )
+  cal(l)_n (vb(x)) = norm(vb(x))_n = root(n, sum_(i=1)^(n)x_i^n)
 $
 
 == $dim(vb(v))$
@@ -118,6 +117,13 @@ $
 == `Pareto`最优解
 
 指在多个约束下无法通过改进其中一个约束而使目标优于其他目标的解，一般会组成一个解集称为`Pareto`前沿。
+
+== 向量三重积 <tripleProduct>
+
+令$vb(a),vb(b),vb(c) in RR^(3)$，有：
+$
+  vb(a) times (vb(b) times vb(c)) = vb(b) (vb(a) dot vb(c)) - vb(c)(vb(a) dot vb(b))
+$
 
 
 = 理论理解
@@ -144,11 +150,11 @@ $
 
 先看单量纲情况：
 $
-  frac(x' ,x) = (frac(m',m))^(p) (frac(t' , t))^(p)
+  frac(x', x) = (frac(m', m))^(p) (frac(t', t))^(p)
 $
 即映射$g$的一个坐标分量为：
 $
-  g_n (u_n) = (frac(m' t',m t))^(u_n)
+  g_n (u_n) = (frac(m' t', m t))^(u_n)
 $
 
 其中：
@@ -188,8 +194,8 @@ $
 
 对于映射，由于秩-零化度定理可知：
 $
-  dim(V) &= dim(ker T) + dim (im T)\ 
-  dim(im T) &lt.eq.slant dim(V)
+     dim(V) & = dim(ker T) + dim (im T) \
+  dim(im T) & lt.eq.slant dim(V)
 $
 
 其中：
@@ -228,7 +234,7 @@ $
 
 定义一个映射$h$，其将量纲指数向量映射为变换量向量：
 $
-  h(vb(u_m); vb(t)) = vb(t)^(dot.o vb(u)_(m))\ 
+  h(vb(u_m); vb(t)) = vb(t)^(dot.o vb(u)_(m))\
   h^(-1) (vb(u_m); vb(t)) = vb(t)^(dot.o (- vb(u)_(m)))
 $
 
@@ -237,7 +243,7 @@ $
 
 那么可得最终总的变换量：
 $
-  v_"unit" = product_(i=1)^(m) h_i (vb(u_m); vb(t))\ 
+  v_"unit" = product_(i=1)^(m) h_i (vb(u_m); vb(t))\
   v_"unit"^(-1) = product_(i=1)^(m) h^(-1)_i (vb(u_m); vb(t))
 $
 
@@ -255,11 +261,61 @@ $
 
 以力矩为例，其赝标量为$abs(vb(F))abs(vb(r))sin theta$。然而物理中对于此并没有区分，因而若按量纲匹配的观念那么力矩的量纲与能量相同，都为$M^(1)L^(2)T^(-2)$，二者相互等价。
 
-所以为了区分，需要单独将宇称独立出来作为一个量纲，其运算规则遵循异或群。
+所以为了区分，需要单独将宇称独立出来作为一个量纲。
 
-这导致另一个问题，对于纯数学的计算库，必须修改运算方式，将叉乘等会产生矢量、标量宇称性质变换的运算修改，为其额外添加一个宇称量纲以标注手性，即不能利用原有的泛函数学库。或者使用列维-奇维塔张量并为其添加宇称来表示叉乘等运算，但该方法得要数学计算库是足够普适的。
+同时注意到其可以与角度量纲相结合以表达旋转概念。那么可让该量纲称为“旋转量纲”，记为$Omega$。
 
-同时注意到其可以与角度量纲相结合以表达旋转概念。那么可让该量纲称为“旋转量纲”。
+对于其物理意义，有：
+- $Omega$ 角度
+- $Omega^(2)$ 立体角
+- $Omega^(-1)$ 每角度
+- $Omega^(-2)$ 每立体角
+
+注意到对于该量纲，所有的奇次幂代表该物理单位是赝标量。
+
+通过角速度公式推导叉乘运算的量纲：
+$
+     vb(v) & = vb(omega) times vb(r) \
+   [vb(v)] & = [vb(omega)] [times] [vb(r)] \
+  L T^(-1) & = Omega T^(-1) [times] L \
+   [times] & = Omega^(-1)
+$
+
+但注意到从另一条相同等式推导得：
+$
+     vb(omega) & = frac(vb(r) times vb(v), norm(vb(r))^2) \
+   [vb(omega)] & = frac([vb(r)] [times] [vb(v)], [norm(vb(r))^2]) \
+  Omega T^(-1) & = frac(L [times] L T^(-1), L^2) \
+       [times] & = Omega
+$
+
+再换个例子，同样是真矢量之间的叉乘：
+$
+                    vb(M) & = vb(F) times vb(r) \
+                  [vb(M)] & = [vb(F)] [times] [vb(r)] \
+  M L^2 T^(-2) Omega^(-1) & = M L T^(-2) [times] L \
+                  [times] & = Omega^(-1)
+$
+
+那么可知实际上：
+$
+  [times] = Omega^(plus.minus 1)
+$
+
+再结合#link(<tripleProduct>)[向量三重积]可以推测，叉乘运算的$Omega$量纲指数取值应尽量让$Omega$量纲指数为#num(0)，但对于$Omega$量纲指数本身就为#num(0)的又陷入了选择难题。
+
+因此引入一邪道方法，在运算中包含质量量纲的就为$Omega^(-1)$，其余为$Omega^(1)$，希望找不到反例。
+
+记物理量量纲指数向量为$vb(x)$，则有：
+$
+  [times] = cases(
+    Omega^(-sgn(x_Omega)) & "if" x_Omega eq.not 0,
+    Omega^(1) & "if" x_Omega = 0 "and" x_M = 0,
+    Omega^(-1) & "if" x_Omega = 0 "and" x_M eq.not 0
+  )
+$
+
+最后就是要修改以前数学运算中叉乘的规则，导致原有的叉乘函数无法使用。
 
 === 温度
 
@@ -272,8 +328,8 @@ $
   table(
     columns: (auto, auto, auto),
     table.header[温度量纲][符号][转换为开尔文的函数],
-    [开尔文], [#unit("K")], [$K = T_K$],
-    [摄氏度], [#unit("celsius")], [$K = T_(degree upright(C)) + 273.15$],
+    [开尔文], [#quan("K")], [$K = T_K$],
+    [摄氏度], [#quan("celsius")], [$K = T_(degree upright(C)) + 273.15$],
     [华氏度], [$degree upright(F)$], [$K = (T_(degree upright(F)) + 459.67) times 5 / 9$],
     [兰金度], [$degree upright(R)$], [$K = T_(degree upright(R)) times 5 / 9$],
     [列氏度], [$degree upright(R e)$], [$K = T_(degree upright(R é)) times 5 / 4 + 273.15$],
@@ -281,13 +337,13 @@ $
     [勒氏温标（罗氏）], [$degree upright(R ø)$], [$K = T_(degree upright(R ø)) times 40 / 21 + 273.15$],
     [德利尔温标], [$degree upright(D e)$], [$K = 373.15 - T_(degree upright(D e)) times 2 / 3$],
   ),
-  caption: [各类温度量纲]
+  caption: [各类温度量纲],
 )
 
 对此只有唯一方法：
 
 单列一次量纲的温度变换，其余只能在温差相同的情况下进行线性变换。
 
-对于比热容、热传率这类物理量，其温度量纲表示的是单位温度所能吸收、传导的热量，表示的是温度的变化量。对于该类物理量，用#unit("K")与#unit("celsius")没有区别，但对于量纲库来说这二者应是有区别的。为区分温度和温度变化量，可引入$Delta unit("celsius")$与$Delta unit("K")$来表示。
+对于比热容、热传率这类物理量，其温度量纲表示的是单位温度所能吸收、传导的热量，表示的是温度的变化量。对于该类物理量，用#quan("K")与#quan("celsius")没有区别，但对于量纲库来说这二者应是有区别的。为区分温度和温度变化量，可引入$Delta quan("celsius")$与$Delta quan("K")$来表示。
 
 同时注意，温度可以加上温度变化量，那么可以得出需将温度量纲拆分为两个量纲：温差与温标，对温标使用线性映射，对温差使用仿射变换且严格限制量纲指数的范围。

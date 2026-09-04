@@ -28,15 +28,6 @@ author = "作者"
 subtitle = "副标题"
 date = "日期"
 and = "与"
-abbrList = "缩写词表"
-symbolList = "符号表"
-
-[abbr.zh]
-PDE = "偏微分方程"
-AI = "人工智能"
-PPI = "单位英寸像素量"
-SIMD = "单指令多数据流"
-MIMD = "多指令多数据流"
 
 [config.en]
 siteTitle = "Bendancom's blog"
@@ -68,12 +59,3 @@ author = "Author"
 subtitle = "Subtitle"
 and = "and"
 date = "Date"
-abbrList = "List of Abbreviations"
-symbolList = "List of Symbol"
-
-[abbr.en]
-PDE = "Partial Differential Equation"
-AI = "Artificial Intelligence"
-PPI = "Pixel Per Inch"
-SIMD = "Single Instruction Multiple Data"
-MIMD = "Multiple Instruction Multiple Data"

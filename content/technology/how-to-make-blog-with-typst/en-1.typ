@@ -1,23 +1,21 @@
 #import "/typ/post.typ": post
 #import "/typ/lib.typ": *
-#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
 
 
 #show: post.with(
   title: [How to Create a Blog with `Typst`],
   subtitle: [Module Description],
-  authors: ("Bendancom"),
+  authors: "Bendancom",
   description: [Detailed explanation of each module in the blog and its functions],
-  date: datetime(year: 2026,month: 4,day: 23),
+  date: datetime(year: 2026, month: 4, day: 23),
   lastModDate: none,
   category: "Technology",
-  tags: ("Typst","Blog","Modules"),
+  tags: ("Typst", "Blog", "Modules"),
   order: 1,
   image: none,
   lang: "en",
 )
-
-#show: abbr
 
 = Overview
 
@@ -68,40 +66,50 @@ Defines the project's base directories and file paths, while loading `config.tom
     set text(size: 9pt)
     diagram(
       node-stroke: 1pt,
-      node((0,0), [`Typst` file], corner-radius: 0.5em),
+      node((0, 0), [`Typst` file], corner-radius: 0.5em),
 
-      edge((0,0), (0,1), "-|>"),
-      node((0,1), [Metadata], corner-radius: 0.5em),
+      edge((0, 0), (0, 1), "-|>"),
+      node((0, 1), [Metadata], corner-radius: 0.5em),
 
-      edge((0,1), (-1,1), (-1,0), "-|>"),
-      node((-1,0), [Sitemap], corner-radius: 0.5em),
+      edge((0, 1), (-1, 1), (-1, 0), "-|>"),
+      node((-1, 0), [Sitemap], corner-radius: 0.5em),
 
-      edge((0,1), (1,1), "-|>"),
-      node((1,1), [#grid(columns: 1, [Title],[Subtitle],[Description], row-gutter: 0.5em)], corner-radius: 0.5em),
+      edge((0, 1), (1, 1), "-|>"),
+      node(
+        (1, 1),
+        [#grid(
+          columns: 1,
+          [Title],
+          [Subtitle],
+          [Description],
+          row-gutter: 0.5em,
+        )],
+        corner-radius: 0.5em,
+      ),
 
-      edge((1,1), (2,1), "-|>"),
-      edge((0,0), (2,0), (2,1),"-|>"),
-      node((2,1), [Raw `HTML` content], corner-radius: 0.5em),
-      edge((2,1), (2,2), "-|>"),
-      node((2,2), [`HTML` content], corner-radius: 0.5em),
+      edge((1, 1), (2, 1), "-|>"),
+      edge((0, 0), (2, 0), (2, 1), "-|>"),
+      node((2, 1), [Raw `HTML` content], corner-radius: 0.5em),
+      edge((2, 1), (2, 2), "-|>"),
+      node((2, 2), [`HTML` content], corner-radius: 0.5em),
 
-      edge((0,1), (0,2), (1,2), "-|>"),
-      node((1,2), [Header], corner-radius: 0.5em),
-      edge((0,1), (0,3), (1,3), "-|>"),
-      node((1,3), [Sidebar], corner-radius: 0.5em),
-      edge((0,1), (0,4), (1,4), "-|>"),
-      node((1,4), [Metadata display bar], corner-radius: 0.5em),
+      edge((0, 1), (0, 2), (1, 2), "-|>"),
+      node((1, 2), [Header], corner-radius: 0.5em),
+      edge((0, 1), (0, 3), (1, 3), "-|>"),
+      node((1, 3), [Sidebar], corner-radius: 0.5em),
+      edge((0, 1), (0, 4), (1, 4), "-|>"),
+      node((1, 4), [Metadata display bar], corner-radius: 0.5em),
 
-      edge((2,2), (2,3), "-|>"),
-      edge((1,2), (1.5,2), (1.5,3), (2,3), "-|>"),
-      edge((1,3), (2,3), "-|>"),
-      edge((1,4), (1.5,4), (1.5,3), (2,3), "-|>"),
-      node((2,3), [Article], corner-radius: 0.5em),
-      edge((2.5,3), (2,3), "-|>"),
+      edge((2, 2), (2, 3), "-|>"),
+      edge((1, 2), (1.5, 2), (1.5, 3), (2, 3), "-|>"),
+      edge((1, 3), (2, 3), "-|>"),
+      edge((1, 4), (1.5, 4), (1.5, 3), (2, 3), "-|>"),
+      node((2, 3), [Article], corner-radius: 0.5em),
+      edge((2.5, 3), (2, 3), "-|>"),
 
-      edge((2,2), (3,2), (3,5), (2,5), (2,4), "-|>"),
-      edge((0,1), (-1,1), (-1,5), (2,5), (2,4), "-|>"),
-      node((2,4), [`Atom` feed], corner-radius: 0.5em),
+      edge((2, 2), (3, 2), (3, 5), (2, 5), (2, 4), "-|>"),
+      edge((0, 1), (-1, 1), (-1, 5), (2, 5), (2, 4), "-|>"),
+      node((2, 4), [`Atom` feed], corner-radius: 0.5em),
     )
   }),
   caption: [Brief flowchart of `Typst` file processing],

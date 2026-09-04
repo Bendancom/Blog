@@ -6,18 +6,16 @@
 #show: post.with(
   title: [How to Create a Blog with `Typst`],
   subtitle: [Preface],
-  authors: ("Bendancom"),
+  authors: "Bendancom",
   description: [Why choose `Typst` as the markup language for blog writing, and why write this series],
-  date: datetime(year: 2026,month: 4,day: 12),
+  date: datetime(year: 2026, month: 4, day: 12),
   lastModDate: none,
   category: "Technology",
-  tags: ("Typst","Blog"),
+  tags: ("Typst", "Blog"),
   order: 0,
   image: none,
   lang: "en",
 )
-
-#show: abbr
 
 = Why use `Typst` to write a blog
 
@@ -29,7 +27,7 @@ My requirement is to write technical articles, which will inevitably involve ext
 
 For example, the standard way to write the differential symbol:
 
-$ dif y =  4 dif x $
+$ dif y = 4 dif x $
 
 This is the `Typst` implementation:
 
@@ -79,8 +77,6 @@ For modularization of data and code, splitting them facilitates writing.
 
 In the distant north, there is a small town surrounded by mountains. Every winter, heavy snow blankets the entire valley, turning rooftops and streets a pristine white. In the early morning, smoke rises gently from low chimneys, intertwining with the mist, as if draping a thin veil over this quiet town. The elderly are accustomed to brewing a pot of hot tea by the fireplace, listening to the sound of snowflakes falling softly outside the window, slowly passing the long afternoons. Occasionally, children build snowmen and have snowball fights in the alleyways, their crisp laughter breaking the winter stillness. Here, there is no hustle and bustle of big cities; time seems to flow exceptionally slowly, every moment worth savoring.
 
-Note: @AI:s generated.
-
 === Image
 
 #figure(
@@ -93,11 +89,11 @@ Note: @AI:s generated.
 #figure(
   table(
     columns: 3,
-    table.header([1],[2],[3]),
-    [222],[111],[333],
-    [444],[555],[666]
+    table.header([1], [2], [3]),
+    [222], [111], [333],
+    [444], [555], [666],
   ),
-  caption: [Test table]
+  caption: [Test table],
 )
 
 === Code
@@ -120,11 +116,11 @@ const Point = struct {
 
 === Formulas
 
-Inline formula $ee = dv(y,x)$
+Inline formula $ee = dv(y, x)$
 
 Display formula:
 $
-  f(x) = x_0 + x_1 ii + x_2 jj + x_3 kk \ 
+  f(x) = x_0 + x_1 ii + x_2 jj + x_3 kk \
   g(y) = y_0 + y_1 ii + y_2 jj + y_3 kk
 $
 
@@ -143,24 +139,11 @@ Compared to `Typst` without package references
 For mathematics and physics packages, almost all are compatible as long as they utilize `Typst`'s formula rendering.
 
 - #link("https://typst.app/universe/package/cetz/")[cetz]
-- #link("https://typst.app/universe/package/abbr/")[abbr]
 
 === Drawing
 
 #canvas(cetz.canvas({
-    import cetz.draw: *
-    circle((0,0))
-    line((0,0),(2,1))
-  })
-)
-
-=== Abbreviation list
-
-#{
-  show heading.where(level: 1): it => {}
-  abbr-list()
-}
-
-@PDE
-
-@PDE:s
+  import cetz.draw: *
+  circle((0, 0))
+  line((0, 0), (2, 1))
+}))

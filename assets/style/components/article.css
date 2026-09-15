@@ -35,7 +35,6 @@ pre.code-block {
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	white-space: pre-wrap;
-	line-height: 75%;
 }
 
 details.code-wrapper > summary {

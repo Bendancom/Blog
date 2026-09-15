@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-import io
-import os
 import re
-import subprocess
 import json
 import argparse
 
@@ -13,10 +10,6 @@ from string import Template
 from pathlib import Path
 from tomllib import load
 from collections import defaultdict
-
-# Test
-from pprint import pprint
-
 import typst
 
 # Configuration
@@ -35,8 +28,8 @@ with open(BASE_DIR / "lang.toml","rb") as f:
     language = load(f)
 
 ArgsParser = argparse.ArgumentParser(description="Help")
-ArgsParser.add_argument("command", type=str, help="how to make the Blog \n - deploy \n - build")
-ArgsParser.add_argument("--rebuild", type=bool, default=False, help="Rebuild the Blog")
+_ = ArgsParser.add_argument("command", type=str, help="how to make the Blog \n - deploy \n - build")
+_ = ArgsParser.add_argument("--rebuild", type=bool, default=False, help="Rebuild the Blog")
 Args = ArgsParser.parse_args()
 
 def urljoin(root) -> str:

@@ -15,6 +15,8 @@
         packages = with pkgs; [
           uv
           python3
+          lxgw-wenkai
+          maple-mono.NF-unhinted
         ];
         UV_PYTHON = "${pkgs.python3}";
         UV_PYTHON_DOWNLOADS = "never";

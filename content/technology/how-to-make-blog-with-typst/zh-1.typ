@@ -63,16 +63,16 @@
 
 #figure(
   canvas({
-    set text(size: 9pt)
     diagram(
       node-stroke: 1pt,
-      node((0, 0), [`Typst`文件], corner-radius: 0.5em),
+      node-corner-radius: 0.5em,
+      node((0, 0), [`Typst`文件]),
 
       edge((0, 0), (0, 1), "-|>"),
-      node((0, 1), [元数据], corner-radius: 0.5em),
+      node((0, 1), [元数据]),
 
       edge((0, 1), (-1, 1), (-1, 0), "-|>"),
-      node((-1, 0), [站点地图], corner-radius: 0.5em),
+      node((-1, 0), [站点地图]),
 
       edge((0, 1), (1, 1), "-|>"),
       node(

@@ -28,18 +28,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Setup uv
+      # 2. Setup font installer
+      - name: Setup font installer
+        uses: fontist/setup-fontist@v2
+
+      # 3, Setup font LXGW 
+      - name: Setup font - LxgwWenKai
+        run: |
+          fontist install --formula "lxgw_wenkai"
+
+      # 4. Setup uv
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.14'
 
-      # 4. Run build script
+      # 5. Run build script
       - name: Run build script
         run: |
           uv run build.py deploy
 
-      # 5. Validate build output
+      # 6. Validate build output
       - name: Validate build output
         run: |
           if [ ! -f "./public/index.html" ]; then
@@ -48,13 +57,13 @@ jobs:
           fi
           echo "Build validation passed"
 
-      # 6. Upload Page artifact
+      # 7. Upload Page artifact
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
-      # 7. Deploy to GitHub Pages
+      # 8. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
